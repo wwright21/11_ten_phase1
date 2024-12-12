@@ -1,0 +1,9 @@
+[theme]
+# Primary accent color for interactive elements.
+primaryColor = "#9cdcf3"
+
+# Background color for the main content area.
+backgroundColor = "#fefefe"
+
+[server]
+runOnSave = true
