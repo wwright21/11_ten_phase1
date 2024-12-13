@@ -4,6 +4,7 @@ import io
 import zipfile
 import openpyxl
 from copy import copy
+import numpy as np
 
 
 # set page configurations
@@ -156,15 +157,64 @@ def main():
             # Overwrite the "Question Order" column with sequential numbers starting from 1
             df["Question Order"] = range(1, len(df) + 1)
 
+            # define Category sequence to be used by 3 of the 4 templates below
+            categories = [
+                'Trust', 'Health', 'Relationships', 'Impact', 'Value', 'Engagement', 'Just Leader'
+            ]
+
+            # Category sequence for the Team template
+            categories2 = [
+                'Trust-L', 'Trust-E', 'Health-L', 'Health-E', 'Relationships-L', 'Relationships-E', 'Impact-L', 'Impact-E', 'Value-L', 'Value-E', 'Engagement-L', 'Engagement-E', 'Just Leader'
+            ]
+
             # fill in the 'Category' column for each template
             if df.shape[0] == 38:  # Review template
-                df["Category"] = 'Review'
+
+                # fill in the "Category" column
+                repetitions = [5, 5, 5, 5, 5, 5, 8]
+                category_list = []
+                for category, rep in zip(categories, repetitions):
+                    category_list.extend([category] * rep)
+                df['Category'] = category_list
             elif df.shape[0] == 45:  # No leader template
-                df["Category"] = 'No leader'
+
+                # fill in the "Category" column
+                repetitions = [5, 10, 5, 5, 5, 5, 10]
+                category_list = []
+                for category, rep in zip(categories, repetitions):
+                    category_list.extend([category] * rep)
+                df['Category'] = category_list
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
-                df["Category"] = 'Leader'
+
+                # fill in the "Category" column
+                repetitions = [10, 10, 10, 10, 10, 10, 20]
+                category_list = []
+                for category, rep in zip(categories, repetitions):
+                    category_list.extend([category] * rep)
+                df['Category'] = category_list
             else:  # Team template
-                df["Category"] = 'Team'
+
+                # fill in the "Category" column
+                repetitions = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 20]
+                category_list = []
+                for category, rep in zip(categories2, repetitions):
+                    category_list.extend([category] * rep)
+                df['Category'] = category_list
+
+            # Group by 'Categories' and calculate the mean 'Avg. Score (%)'
+            grouped_df = df.groupby('Category')[
+                'Avg. Score (%)'].mean().reset_index()
+
+            # Merge the grouped DataFrame back to the original, aligning on 'Categories'
+            df = df.merge(grouped_df, on='Category')
+
+            # Rename the merged 'Avg. Score (%)' to 'Category Average'
+            df = df.rename(columns={'Avg. Score (%)_y': 'Category Average'})
+            df = df.rename(columns={'Avg. Score (%)_x': 'Avg. Score (%)'})
+
+            # don't need averages for the Just Leader questions
+            df.loc[df['Category'] == 'Just Leader',
+                   'Category Average'] = np.nan
 
             # Write the sorted DataFrame back into the Excel sheet starting at A24
             row = 24  # Starting from row 24
@@ -174,6 +224,7 @@ def main():
                 ws[f"C{row}"] = row_data["Avg. Score (%)"]
                 ws[f"D{row}"] = row_data["Question Order"]
                 ws[f"E{row}"] = row_data["Category"]
+                ws[f"F{row}"] = row_data["Category Average"]
                 row += 1  # Move to the next row
 
             # any final adjustments to the table
