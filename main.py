@@ -157,13 +157,13 @@ def main():
             df["Question Order"] = range(1, len(df) + 1)
 
             # fill in the 'Category' column for each template
-            if df.shape[0] == 38:
+            if df.shape[0] == 38:  # Review template
                 df["Category"] = 'Review'
-            elif df.shape[0] == 45:
+            elif df.shape[0] == 45:  # No leader template
                 df["Category"] = 'No leader'
-            elif str(df["Questions"].iloc[0]).startswith("Q7"):
+            elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
                 df["Category"] = 'Leader'
-            else:
+            else:  # Team template
                 df["Category"] = 'Team'
 
             # Write the sorted DataFrame back into the Excel sheet starting at A24
