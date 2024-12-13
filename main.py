@@ -27,7 +27,7 @@ hide_default_format = """
             display: none
         }
         [data-testid="stFileUploaderDropzone"] {
-            background-color: #fefefe;
+            background-color: #9cdcf3;
             border-radius: 15px;
             border: 1px solid #1F2041;
             padding: 15px; /* Optional: Add some padding */
@@ -43,10 +43,27 @@ hide_default_format = """
             visibility: hidden;
         }
         div[data-testid="stFileUploaderDropzoneInstructions"]>div>small::before {
-            content: "You can upload more than 1 file at a time.";
+            content: "You can upload more than 1 file at a time!";
             visibility: visible;
         }
         .stDownloadButton, div.stButton {text-align:center}
+        [data-testid="stBaseButton-secondary"] {
+            background-color: #9cdcf3;
+            border-radius: 15px;
+            border: 1px solid #1F2041;
+        }
+        [data-testid="stFileUploaderFile"] {
+            color: #fefefe;
+        }
+        div[data-testid="stFileUploaderFile"] div>small {
+            color: #fefefe;
+        }
+        [data-testid="stFileUploaderPagination"] >small {
+            color: #fefefe;
+        }
+        [data-testid="stBaseButton-minimal"] {
+            color: #fefefe;
+        }
     </style>
 """
 
@@ -54,8 +71,11 @@ hide_default_format = """
 st.markdown(hide_default_format, unsafe_allow_html=True)
 
 # heading text
+# fefefe (white)
+# 9cdcf3 (blue)
+# 1b1b1b (black)
 st.markdown(f'''
-    <p style="font-size: 40px; font-weight: 900; text-align: center; margin-top: 10px; margin-bottom: 80px; color: #1b1b1b;">
+    <p style="font-size: 40px; font-weight: 900; text-align: center; margin-top: 10px; margin-bottom: 80px; color: #9cdcf3;">
         11 Ten Leadership Cleaning App
     </p>
 ''', unsafe_allow_html=True)
@@ -96,14 +116,17 @@ def main():
             ws["D23"] = "Question Order"
             ws["D23"].font = copy(ws["C23"].font)
             ws["D23"].fill = copy(ws["C23"].fill)
+            ws["D23"].alignment = copy(ws["C23"].alignment)
 
             ws["E23"] = "Category"
             ws["E23"].font = copy(ws["C23"].font)
             ws["E23"].fill = copy(ws["C23"].fill)
+            ws["E23"].alignment = copy(ws["C23"].alignment)
 
             ws["F23"] = "Category Average"
             ws["F23"].font = copy(ws["C23"].font)
             ws["F23"].fill = copy(ws["C23"].fill)
+            ws["F23"].alignment = copy(ws["C23"].alignment)
 
             # Extract the data starting from A23 down until the first blank cell
             row = 24
@@ -118,6 +141,11 @@ def main():
             df = pd.DataFrame(
                 data, columns=["Questions", "Difficulty", "Average Score"])
 
+            # Convert the 'Average Score' column to integer
+            df["Average Score"] = df["Average Score"].str.replace(
+                '%', '').astype(int)
+            df = df.rename(columns={"Average Score": "Avg. Score (%)"})
+
             # Add the "Question Order" column based on the extracted question
             df["Question Order"] = df["Questions"].apply(
                 extract_question_number).astype(int)
@@ -125,14 +153,36 @@ def main():
             # Sort the DataFrame by "Question Order"
             df = df.sort_values(by="Question Order")
 
+            # Overwrite the "Question Order" column with sequential numbers starting from 1
+            df["Question Order"] = range(1, len(df) + 1)
+
+            # fill in the 'Category' column for each template
+            if df.shape[0] == 38:
+                df["Category"] = 'Review'
+            elif df.shape[0] == 45:
+                df["Category"] = 'No leader'
+            elif str(df["Questions"].iloc[0]).startswith("Q7"):
+                df["Category"] = 'Leader'
+            else:
+                df["Category"] = 'Team'
+
             # Write the sorted DataFrame back into the Excel sheet starting at A24
             row = 24  # Starting from row 24
             for idx, row_data in df.iterrows():
                 ws[f"A{row}"] = row_data["Questions"]
                 ws[f"B{row}"] = row_data["Difficulty"]
-                ws[f"C{row}"] = row_data["Average Score"]
+                ws[f"C{row}"] = row_data["Avg. Score (%)"]
                 ws[f"D{row}"] = row_data["Question Order"]
+                ws[f"E{row}"] = row_data["Category"]
                 row += 1  # Move to the next row
+
+            # any final adjustments to the table
+            ws["C23"] = "Avg. Score (%)"
+            ws.column_dimensions['B'].width = 10
+            ws.column_dimensions['C'].width = 16
+            ws.column_dimensions['D'].width = 14
+            ws.column_dimensions['E'].width = 14
+            ws.column_dimensions['F'].width = 16
 
             # Add "_clean" suffix to the file name before the extension
             clean_file_name = f"{uploaded_file.name.rsplit('.', 1)[0]}_clean.xlsx"
