@@ -3,6 +3,7 @@ import pandas as pd
 import io
 import zipfile
 import openpyxl
+from openpyxl.styles import Font
 from copy import copy
 import numpy as np
 
@@ -101,6 +102,10 @@ def main():
     )
 
     if uploaded_files:
+
+        # # show photo of Belichick
+        # st.image('assets/bill_2.png')
+
         # Prepare list to hold file data
         files_to_download = []
 
@@ -113,18 +118,22 @@ def main():
             wb = openpyxl.load_workbook(file_data)
             ws = wb.active  # Assuming the data is on the active sheet
 
+            # Iterate over all merged cells and unmerge them
+            for merged_cell_range in list(ws.merged_cells.ranges):
+                ws.unmerge_cells(str(merged_cell_range))
+
             # Add new columns & formatting
             ws["D23"] = "Question Order"
             ws["D23"].font = copy(ws["C23"].font)
             ws["D23"].fill = copy(ws["C23"].fill)
             ws["D23"].alignment = copy(ws["C23"].alignment)
 
-            ws["E23"] = "Category"
+            ws["E23"] = "1st-Order Category"
             ws["E23"].font = copy(ws["C23"].font)
             ws["E23"].fill = copy(ws["C23"].fill)
             ws["E23"].alignment = copy(ws["C23"].alignment)
 
-            ws["F23"] = "Category Average"
+            ws["F23"] = "2nd-Order Category"
             ws["F23"].font = copy(ws["C23"].font)
             ws["F23"].fill = copy(ws["C23"].fill)
             ws["F23"].alignment = copy(ws["C23"].alignment)
@@ -157,83 +166,412 @@ def main():
             # Overwrite the "Question Order" column with sequential numbers starting from 1
             df["Question Order"] = range(1, len(df) + 1)
 
-            # define Category sequence to be used by 3 of the 4 templates below
-            categories = [
-                'Trust', 'Health', 'Relationships', 'Impact', 'Value', 'Engagement', 'Just Leader'
-            ]
+            # 1st-, 2nd-, and 3rd-Order Categories
+            category_1 = ['THRIVE', 'Just Leader']
+            category_2 = [
+                'Trust', 'Health', 'Relationships', 'Impact', 'Value', 'Engagement', 'See the Whole Playing Field', 'Build Cultural Competency', 'Give Power Away', 'Take Bold, Courageous Action']
 
-            # Category sequence for the Team template
-            categories2 = [
-                'Trust-L', 'Trust-E', 'Health-L', 'Health-E', 'Relationships-L', 'Relationships-E', 'Impact-L', 'Impact-E', 'Value-L', 'Value-E', 'Engagement-L', 'Engagement-E', 'Just Leader'
-            ]
+            # this level will only pertain to the LEADER and TEAM templates
+            category_3 = [
+                'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team', 'Leader', 'Team']
 
-            # fill in the 'Category' column for each template
+            template = ''
+
+            # fill out templates
             if df.shape[0] == 38:  # Review template
 
-                # fill in the "Category" column
-                repetitions = [5, 5, 5, 5, 5, 5, 8]
-                category_list = []
-                for category, rep in zip(categories, repetitions):
-                    category_list.extend([category] * rep)
-                df['Category'] = category_list
-            elif df.shape[0] == 45:  # No leader template
+                template = 'Review'
 
                 # fill in the "Category" column
-                repetitions = [5, 10, 5, 5, 5, 5, 10]
-                category_list = []
-                for category, rep in zip(categories, repetitions):
-                    category_list.extend([category] * rep)
-                df['Category'] = category_list
+                repetitions_1 = [30, 8]
+                category_list_1 = []
+                for category, rep in zip(category_1, repetitions_1):
+                    category_list_1.extend([category] * rep)
+                df['1st-Order Category'] = category_list_1
+                first0_summary = df.groupby(
+                    '1st-Order Category')['Avg. Score (%)'].mean().reset_index()
+
+                # Start from A22 and find the last filled cell in column A
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+
+                # Move one row below the last filled cell
+                start_row = current_row + 1
+
+                # Insert 12 blank rows after the last row written
+                ws.insert_rows(current_row, 16)
+
+                # reset the row count to copy / paste values
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+                start_row = current_row + 1
+
+                # Write the DataFrame headers to the sheet
+                headers = list(first0_summary.columns)  # Get column headers
+
+                # Write headers in the first row
+                for col_idx, header in enumerate(headers, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents to the sheet
+                for row_idx, row_data in first0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                start_row = start_row + 4
+
+                repetitions_2 = [5, 5, 5, 5, 5, 5, 2, 2, 2, 2]
+                category_list_2 = []
+                for category, rep in zip(category_2, repetitions_2):
+                    category_list_2.extend([category] * rep)
+                df['2nd-Order Category'] = category_list_2
+                second0_summary = df.groupby(
+                    ['1st-Order Category', '2nd-Order Category'])['Avg. Score (%)'].mean().reset_index().drop(columns='1st-Order Category')
+
+                # use a custom sort for the summary table
+                second0_summary['2nd-Order Category'] = pd.Categorical(
+                    second0_summary['2nd-Order Category'], [
+                        "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
+                    ])
+                second0_summary = second0_summary.sort_values(
+                    "2nd-Order Category", ascending=False)
+
+                # Write headers in the first row of the new section
+                for col_idx, header in enumerate(second0_summary.columns, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents row by row
+                for row_idx, row_data in second0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                # Define the range of cells
+                start_row = 24
+                end_row = 77
+                start_col = 1  # Column A (1-indexed)
+                end_col = 7  # Column C (1-indexed)
+
+                # Define the font style
+                custom_font = Font(name="Arial", size=11)
+
+                # Apply the font style to each cell in the range
+                for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
+                    for cell in row:
+                        cell.font = custom_font
+
+            elif df.shape[0] == 47:  # No leader template
+
+                template = 'No leader'
+                repetitions_1 = [35, 12]
+                category_list_1 = []
+                for category, rep in zip(category_1, repetitions_1):
+                    category_list_1.extend([category] * rep)
+                df['1st-Order Category'] = category_list_1
+                first0_summary = df.groupby(
+                    '1st-Order Category')['Avg. Score (%)'].mean().reset_index()
+
+                # Start from A22 and find the last filled cell in column A
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+
+                # Move one row below the last filled cell
+                start_row = current_row + 1
+
+                # Insert 12 blank rows after the last row written
+                ws.insert_rows(current_row, 16)
+
+                # reset the row count to copy / paste values
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+                start_row = current_row + 1
+
+                # Write the DataFrame headers to the sheet
+                headers = list(first0_summary.columns)  # Get column headers
+
+                # Write headers in the first row
+                for col_idx, header in enumerate(headers, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents to the sheet
+                for row_idx, row_data in first0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                start_row = start_row + 4
+
+                repetitions_2 = [5, 10, 5, 5, 5, 5, 3, 3, 3, 3]
+                category_list_2 = []
+                for category, rep in zip(category_2, repetitions_2):
+                    category_list_2.extend([category] * rep)
+                df['2nd-Order Category'] = category_list_2
+                second0_summary = df.groupby(
+                    ['1st-Order Category', '2nd-Order Category'])['Avg. Score (%)'].mean().reset_index().drop(columns='1st-Order Category')
+
+                # use a custom sort for the summary table
+                second0_summary['2nd-Order Category'] = pd.Categorical(
+                    second0_summary['2nd-Order Category'], [
+                        "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
+                    ])
+                second0_summary = second0_summary.sort_values(
+                    "2nd-Order Category", ascending=False)
+
+                # Write headers in the first row of the new section
+                for col_idx, header in enumerate(second0_summary.columns, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents row by row
+                for row_idx, row_data in second0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                # Define the range of cells
+                start_row = 24
+                end_row = 86
+                start_col = 1  # Column A (1-indexed)
+                end_col = 7  # Column C (1-indexed)
+
+                # Define the font style
+                custom_font = Font(name="Arial", size=11)
+
+                # Apply the font style to each cell in the range
+                for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
+                    for cell in row:
+                        cell.font = custom_font
+
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
 
-                # fill in the "Category" column
-                repetitions = [10, 10, 10, 10, 10, 10, 20]
-                category_list = []
-                for category, rep in zip(categories, repetitions):
-                    category_list.extend([category] * rep)
-                df['Category'] = category_list
+                template = 'Leader'
+                # First level breakdown
+                repetitions_1 = [60, 20]
+                category_list_1 = []
+                for category, rep in zip(category_1, repetitions_1):
+                    category_list_1.extend([category] * rep)
+                df['1st-Order Category'] = category_list_1
+                first0_summary = df.groupby(
+                    '1st-Order Category')['Avg. Score (%)'].mean().reset_index()
+
+                # Start from A22 and find the last filled cell in column A
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+
+                # Move one row below the last filled cell
+                start_row = current_row + 1
+
+                # Insert 12 blank rows after the last row written
+                ws.insert_rows(current_row, 16)
+
+                # reset the row count to copy / paste values
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+                start_row = current_row + 1
+
+                # Write the DataFrame headers to the sheet
+                headers = list(first0_summary.columns)  # Get column headers
+
+                # Write headers in the first row
+                for col_idx, header in enumerate(headers, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents to the sheet
+                for row_idx, row_data in first0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                start_row = start_row + 4
+
+                # Second level breakdown
+                repetitions_2 = [10, 10, 10, 10, 10, 10, 5, 5, 5, 5]
+                category_list_2 = []
+                for category, rep in zip(category_2, repetitions_2):
+                    category_list_2.extend([category] * rep)
+                df['2nd-Order Category'] = category_list_2
+                second0_summary = df.groupby(
+                    ['1st-Order Category', '2nd-Order Category'])['Avg. Score (%)'].mean().reset_index().drop(columns='1st-Order Category')
+
+                # use a custom sort for the summary table
+                second0_summary['2nd-Order Category'] = pd.Categorical(
+                    second0_summary['2nd-Order Category'], [
+                        "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
+                    ])
+                second0_summary = second0_summary.sort_values(
+                    "2nd-Order Category", ascending=False)
+
+                # Write headers in the first row of the new section
+                for col_idx, header in enumerate(second0_summary.columns, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents row by row
+                for row_idx, row_data in second0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                # Third level breakdown
+                repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
+                                 5, 5, 5, 5, 2, 3, 2, 3, 2, 3, 2, 3]
+                category_list_3 = []
+                for category, rep in zip(category_3, repetitions_3):
+                    category_list_3.extend([category] * rep)
+                df['3rd-Order Category'] = category_list_3
+
+                # Define the range of cells
+                start_row = 24
+                end_row = 119
+                start_col = 1  # Column A (1-indexed)
+                end_col = 7  # Column C (1-indexed)
+
+                # Define the font style
+                custom_font = Font(name="Arial", size=11)
+
+                # Apply the font style to each cell in the range
+                for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
+                    for cell in row:
+                        cell.font = custom_font
+
             else:  # Team template
 
-                # fill in the "Category" column
-                repetitions = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 20]
-                category_list = []
-                for category, rep in zip(categories2, repetitions):
-                    category_list.extend([category] * rep)
-                df['Category'] = category_list
+                template = 'Team'
+                # First level breakdown
+                repetitions_1 = [60, 20]
+                category_list_1 = []
+                for category, rep in zip(category_1, repetitions_1):
+                    category_list_1.extend([category] * rep)
+                df['1st-Order Category'] = category_list_1
+                first0_summary = df.groupby(
+                    '1st-Order Category')['Avg. Score (%)'].mean().reset_index()
 
-            # Group by 'Categories' and calculate the mean 'Avg. Score (%)'
-            grouped_df = df.groupby('Category')[
-                'Avg. Score (%)'].mean().reset_index()
+                # Start from A22 and find the last filled cell in column A
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
 
-            # Merge the grouped DataFrame back to the original, aligning on 'Categories'
-            df = df.merge(grouped_df, on='Category')
+                # Move one row below the last filled cell
+                start_row = current_row + 1
 
-            # Rename the merged 'Avg. Score (%)' to 'Category Average'
-            df = df.rename(columns={'Avg. Score (%)_y': 'Category Average'})
-            df = df.rename(columns={'Avg. Score (%)_x': 'Avg. Score (%)'})
+                # Insert 12 blank rows after the last row written
+                ws.insert_rows(current_row, 16)
 
-            # don't need averages for the Just Leader questions
-            df.loc[df['Category'] == 'Just Leader',
-                   'Category Average'] = np.nan
+                # reset the row count to copy / paste values
+                current_row = 22
+                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
+                    current_row += 1  # Move down
+                start_row = current_row + 1
 
-            # Write the sorted DataFrame back into the Excel sheet starting at A24
-            row = 24  # Starting from row 24
-            for idx, row_data in df.iterrows():
-                ws[f"A{row}"] = row_data["Questions"]
-                ws[f"B{row}"] = row_data["Difficulty"]
-                ws[f"C{row}"] = row_data["Avg. Score (%)"]
-                ws[f"D{row}"] = row_data["Question Order"]
-                ws[f"E{row}"] = row_data["Category"]
-                ws[f"F{row}"] = row_data["Category Average"]
-                row += 1  # Move to the next row
+                # Write the DataFrame headers to the sheet
+                headers = list(first0_summary.columns)  # Get column headers
+
+                # Write headers in the first row
+                for col_idx, header in enumerate(headers, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents to the sheet
+                for row_idx, row_data in first0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                start_row = start_row + 4
+
+                # Second level breakdown
+                repetitions_2 = [10, 10, 10, 10, 10, 10, 5, 5, 5, 5]
+                category_list_2 = []
+                for category, rep in zip(category_2, repetitions_2):
+                    category_list_2.extend([category] * rep)
+                df['2nd-Order Category'] = category_list_2
+                second0_summary = df.groupby(
+                    ['1st-Order Category', '2nd-Order Category'])['Avg. Score (%)'].mean().reset_index().drop(columns='1st-Order Category')
+
+                # use a custom sort for the summary table
+                second0_summary['2nd-Order Category'] = pd.Categorical(
+                    second0_summary['2nd-Order Category'], [
+                        "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
+                    ])
+                second0_summary = second0_summary.sort_values(
+                    "2nd-Order Category", ascending=False)
+
+                # Write headers in the first row of the new section
+                for col_idx, header in enumerate(second0_summary.columns, start=1):
+                    ws.cell(row=start_row, column=col_idx, value=header)
+
+                # Write the DataFrame contents row by row
+                for row_idx, row_data in second0_summary.iterrows():
+                    for col_idx, value in enumerate(row_data, start=1):
+                        ws.cell(row=start_row + row_idx + 1,
+                                column=col_idx, value=value)
+
+                # Third level breakdown
+                repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
+                                 5, 5, 5, 5, 2, 3, 2, 3, 2, 3, 2, 3]
+                category_list_3 = []
+                for category, rep in zip(category_3, repetitions_3):
+                    category_list_3.extend([category] * rep)
+                df['3rd-Order Category'] = category_list_3
+
+                # Define the range of cells
+                start_row = 24
+                end_row = 119
+                start_col = 1  # Column A (1-indexed)
+                end_col = 7  # Column C (1-indexed)
+
+                # Define the font style
+                custom_font = Font(name="Arial", size=11)
+
+                # Apply the font style to each cell in the range
+                for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
+                    for cell in row:
+                        cell.font = custom_font
+
+            # For the Leader and Team templates, there will be a 3rd order category
+            if template == 'Leader' or template == 'Team':
+
+                # label Column G, which won't be necessary for the other 2 templates
+                ws["G23"] = "3rd-Order Category"
+                ws["G23"].font = copy(ws["C23"].font)
+                ws["G23"].fill = copy(ws["C23"].fill)
+                ws["G23"].alignment = copy(ws["C23"].alignment)
+
+                row = 24  # Starting from row 24
+                for idx, row_data in df.iterrows():
+                    ws[f"A{row}"] = row_data["Questions"]
+                    ws[f"B{row}"] = row_data["Difficulty"]
+                    ws[f"C{row}"] = row_data["Avg. Score (%)"]
+                    ws[f"D{row}"] = row_data["Question Order"]
+                    ws[f"E{row}"] = row_data["1st-Order Category"]
+                    ws[f"F{row}"] = row_data["2nd-Order Category"]
+                    ws[f"G{row}"] = row_data["3rd-Order Category"]
+                    row += 1  # Move to the next row
+                ws.column_dimensions['G'].width = 18
+
+            else:
+                row = 24  # Starting from row 24
+                for idx, row_data in df.iterrows():
+                    ws[f"A{row}"] = row_data["Questions"]
+                    ws[f"B{row}"] = row_data["Difficulty"]
+                    ws[f"C{row}"] = row_data["Avg. Score (%)"]
+                    ws[f"D{row}"] = row_data["Question Order"]
+                    ws[f"E{row}"] = row_data["1st-Order Category"]
+                    ws[f"F{row}"] = row_data["2nd-Order Category"]
+                    row += 1  # Move to the next row
 
             # any final adjustments to the table
             ws["C23"] = "Avg. Score (%)"
+            ws.column_dimensions['A'].width = 50
             ws.column_dimensions['B'].width = 10
             ws.column_dimensions['C'].width = 16
             ws.column_dimensions['D'].width = 14
-            ws.column_dimensions['E'].width = 14
-            ws.column_dimensions['F'].width = 16
+            ws.column_dimensions['E'].width = 18
+            ws.column_dimensions['F'].width = 18
 
             # Add "_clean" suffix to the file name before the extension
             clean_file_name = f"{uploaded_file.name.rsplit('.', 1)[0]}_clean.xlsx"
