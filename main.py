@@ -66,6 +66,14 @@ hide_default_format = """
         [data-testid="stBaseButton-minimal"] {
             color: #fefefe;
         }
+        [data-testid="stImageContainer"] {
+            position: absolute;
+            top: 0%; 
+            left: -210%; 
+        }
+        [data-testid="stBaseButton-elementToolbar"] {
+            display: none;
+        }
     </style>
 """
 
