@@ -111,9 +111,6 @@ def main():
 
     if uploaded_files:
 
-        # # show photo of Belichick
-        # st.image('assets/bill_2.png')
-
         # Prepare list to hold file data
         files_to_download = []
 
@@ -164,6 +161,9 @@ def main():
                 '%', '').astype(int)
             df = df.rename(columns={"Average Score": "Avg. Score (%)"})
 
+            # convert overall average
+            overall_avg = df["Avg. Score (%)"].mean()
+
             # Add the "Question Order" column based on the extracted question
             df["Question Order"] = df["Questions"].apply(
                 extract_question_number).astype(int)
@@ -208,7 +208,11 @@ def main():
                 start_row = current_row + 1
 
                 # Insert blank rows after the last row written
-                ws.insert_rows(current_row, 16)
+                ws.insert_rows(current_row, 18)
+
+                # Add the overall average
+                ws["A63"] = "Overall Average"
+                ws["B63"] = overall_avg
 
                 # use a custom sort for the summary table
                 first0_summary['1st-Order Category'] = pd.Categorical(
@@ -219,10 +223,10 @@ def main():
                     "1st-Order Category")
 
                 # header rows
-                ws["A63"] = "1st-Order Category"
-                ws["B63"] = "Avg. Score (%)"
+                ws["A65"] = "1st-Order Category"
+                ws["B65"] = "Avg. Score (%)"
 
-                row = 64  # Starting point
+                row = 66  # Starting point
                 for _, row_data in first0_summary.iterrows():
                     ws[f"A{row}"] = row_data["1st-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -245,10 +249,10 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A67"] = "2nd-Order Category"
-                ws["B67"] = "Avg. Score (%)"
+                ws["A69"] = "2nd-Order Category"
+                ws["B69"] = "Avg. Score (%)"
 
-                row = 68  # Starting point
+                row = 70  # Starting point
                 for _, row_data in second0_summary.iterrows():
                     ws[f"A{row}"] = row_data["2nd-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -256,7 +260,7 @@ def main():
 
                 # Format the newly-created cells
                 start_row = 24
-                end_row = 77
+                end_row = 79
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -269,18 +273,20 @@ def main():
                         cell.font = custom_font
 
                 # format the headers
-                ws["A63"].font = Font(name="Arial", size=11, bold=True)
-                ws["B63"].font = Font(name="Arial", size=11, bold=True)
-                ws["A67"].font = Font(name="Arial", size=11, bold=True)
-                ws["B67"].font = Font(name="Arial", size=11, bold=True)
+                ws["A63"].font = Font(name="Arial", size=12, bold=True)
+                ws["B63"].font = Font(name="Arial", size=12, bold=True)
+                ws["A65"].font = Font(name="Arial", size=11, bold=True)
+                ws["B65"].font = Font(name="Arial", size=11, bold=True)
+                ws["A69"].font = Font(name="Arial", size=11, bold=True)
+                ws["B69"].font = Font(name="Arial", size=11, bold=True)
 
-                ws["A63"].alignment = copy(ws["C23"].alignment)
-                ws["B63"].alignment = copy(ws["C23"].alignment)
-                ws["A67"].alignment = copy(ws["C23"].alignment)
-                ws["B67"].alignment = copy(ws["C23"].alignment)
+                ws["A65"].alignment = copy(ws["C23"].alignment)
+                ws["B65"].alignment = copy(ws["C23"].alignment)
+                ws["A69"].alignment = copy(ws["C23"].alignment)
+                ws["B69"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=64, max_row=77, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=63, max_row=79, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -311,7 +317,11 @@ def main():
                 start_row = current_row + 1
 
                 # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 16)
+                ws.insert_rows(current_row, 18)
+
+                # Add the overall average
+                ws["A72"] = "Overall Average"
+                ws["B72"] = overall_avg
 
                 # use a custom sort for the summary table
                 first0_summary['1st-Order Category'] = pd.Categorical(
@@ -322,10 +332,10 @@ def main():
                     "1st-Order Category")
 
                 # header rows
-                ws["A72"] = "1st-Order Category"
-                ws["B72"] = "Avg. Score (%)"
+                ws["A74"] = "1st-Order Category"
+                ws["B74"] = "Avg. Score (%)"
 
-                row = 73  # Starting point
+                row = 75  # Starting point
                 for _, row_data in first0_summary.iterrows():
                     ws[f"A{row}"] = row_data["1st-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -348,10 +358,10 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A76"] = "2nd-Order Category"
-                ws["B76"] = "Avg. Score (%)"
+                ws["A78"] = "2nd-Order Category"
+                ws["B78"] = "Avg. Score (%)"
 
-                row = 77  # Starting point
+                row = 79  # Starting point
                 for _, row_data in second0_summary.iterrows():
                     ws[f"A{row}"] = row_data["2nd-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -359,7 +369,7 @@ def main():
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 86
+                end_row = 88
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -372,18 +382,20 @@ def main():
                         cell.font = custom_font
 
                 # format the headers
-                ws["A72"].font = Font(name="Arial", size=11, bold=True)
-                ws["B72"].font = Font(name="Arial", size=11, bold=True)
-                ws["A76"].font = Font(name="Arial", size=11, bold=True)
-                ws["B76"].font = Font(name="Arial", size=11, bold=True)
+                ws["A72"].font = Font(name="Arial", size=12, bold=True)
+                ws["B72"].font = Font(name="Arial", size=12, bold=True)
+                ws["A74"].font = Font(name="Arial", size=11, bold=True)
+                ws["B74"].font = Font(name="Arial", size=11, bold=True)
+                ws["A78"].font = Font(name="Arial", size=11, bold=True)
+                ws["B78"].font = Font(name="Arial", size=11, bold=True)
 
-                ws["A72"].alignment = copy(ws["C23"].alignment)
-                ws["B72"].alignment = copy(ws["C23"].alignment)
-                ws["A76"].alignment = copy(ws["C23"].alignment)
-                ws["B76"].alignment = copy(ws["C23"].alignment)
+                ws["A74"].alignment = copy(ws["C23"].alignment)
+                ws["B74"].alignment = copy(ws["C23"].alignment)
+                ws["A78"].alignment = copy(ws["C23"].alignment)
+                ws["B78"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=73, max_row=86, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=72, max_row=88, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -391,7 +403,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(71, 86):
+                for row in range(71, 88):
                     ws.row_dimensions[row].height = 15
 
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
@@ -415,7 +427,11 @@ def main():
                 start_row = current_row + 1
 
                 # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 16)
+                ws.insert_rows(current_row, 18)
+
+                # Add the overall average
+                ws["A105"] = "Overall Average"
+                ws["B105"] = overall_avg
 
                 # use a custom sort for the summary table
                 first0_summary['1st-Order Category'] = pd.Categorical(
@@ -426,10 +442,10 @@ def main():
                     "1st-Order Category")
 
                 # header rows
-                ws["A105"] = "1st-Order Category"
-                ws["B105"] = "Avg. Score (%)"
+                ws["A107"] = "1st-Order Category"
+                ws["B107"] = "Avg. Score (%)"
 
-                row = 106  # Starting point
+                row = 108  # Starting point
                 for _, row_data in first0_summary.iterrows():
                     ws[f"A{row}"] = row_data["1st-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -453,10 +469,10 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A109"] = "2nd-Order Category"
-                ws["B109"] = "Avg. Score (%)"
+                ws["A111"] = "2nd-Order Category"
+                ws["B111"] = "Avg. Score (%)"
 
-                row = 110  # Starting point
+                row = 112  # Starting point
                 for _, row_data in second0_summary.iterrows():
                     ws[f"A{row}"] = row_data["2nd-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -472,7 +488,7 @@ def main():
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 119
+                end_row = 121
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -485,18 +501,20 @@ def main():
                         cell.font = custom_font
 
                 # format the headers
-                ws["A105"].font = Font(name="Arial", size=11, bold=True)
-                ws["B105"].font = Font(name="Arial", size=11, bold=True)
-                ws["A109"].font = Font(name="Arial", size=11, bold=True)
-                ws["B109"].font = Font(name="Arial", size=11, bold=True)
+                ws["A105"].font = Font(name="Arial", size=12, bold=True)
+                ws["B105"].font = Font(name="Arial", size=12, bold=True)
+                ws["A107"].font = Font(name="Arial", size=12, bold=True)
+                ws["B107"].font = Font(name="Arial", size=12, bold=True)
+                ws["A111"].font = Font(name="Arial", size=11, bold=True)
+                ws["B111"].font = Font(name="Arial", size=11, bold=True)
 
-                ws["A105"].alignment = copy(ws["C23"].alignment)
-                ws["B105"].alignment = copy(ws["C23"].alignment)
-                ws["A109"].alignment = copy(ws["C23"].alignment)
-                ws["B109"].alignment = copy(ws["C23"].alignment)
+                ws["A107"].alignment = copy(ws["C23"].alignment)
+                ws["B107"].alignment = copy(ws["C23"].alignment)
+                ws["A111"].alignment = copy(ws["C23"].alignment)
+                ws["B111"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=106, max_row=119, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=105, max_row=121, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -527,8 +545,12 @@ def main():
                 # Move one row below the last filled cell
                 start_row = current_row + 1
 
-                # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 16)
+                # Insert blank rows after the last row written
+                ws.insert_rows(current_row, 18)
+
+                # Add the overall average
+                ws["A105"] = "Overall Average"
+                ws["B105"] = overall_avg
 
                 # use a custom sort for the summary table
                 first0_summary['1st-Order Category'] = pd.Categorical(
@@ -539,10 +561,10 @@ def main():
                     "1st-Order Category")
 
                 # header rows
-                ws["A105"] = "1st-Order Category"
-                ws["B105"] = "Avg. Score (%)"
+                ws["A107"] = "1st-Order Category"
+                ws["B107"] = "Avg. Score (%)"
 
-                row = 106  # Starting point
+                row = 108  # Starting point
                 for _, row_data in first0_summary.iterrows():
                     ws[f"A{row}"] = row_data["1st-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -566,10 +588,10 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A109"] = "2nd-Order Category"
-                ws["B109"] = "Avg. Score (%)"
+                ws["A111"] = "2nd-Order Category"
+                ws["B111"] = "Avg. Score (%)"
 
-                row = 110  # Starting point
+                row = 112  # Starting point
                 for _, row_data in second0_summary.iterrows():
                     ws[f"A{row}"] = row_data["2nd-Order Category"]
                     ws[f"B{row}"] = row_data["Avg. Score (%)"]
@@ -585,7 +607,7 @@ def main():
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 119
+                end_row = 121
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -598,18 +620,20 @@ def main():
                         cell.font = custom_font
 
                 # format the headers
-                ws["A105"].font = Font(name="Arial", size=11, bold=True)
-                ws["B105"].font = Font(name="Arial", size=11, bold=True)
-                ws["A109"].font = Font(name="Arial", size=11, bold=True)
-                ws["B109"].font = Font(name="Arial", size=11, bold=True)
+                ws["A105"].font = Font(name="Arial", size=12, bold=True)
+                ws["B105"].font = Font(name="Arial", size=12, bold=True)
+                ws["A107"].font = Font(name="Arial", size=11, bold=True)
+                ws["B107"].font = Font(name="Arial", size=11, bold=True)
+                ws["A111"].font = Font(name="Arial", size=11, bold=True)
+                ws["B111"].font = Font(name="Arial", size=11, bold=True)
 
-                ws["A105"].alignment = copy(ws["C23"].alignment)
-                ws["B105"].alignment = copy(ws["C23"].alignment)
-                ws["A109"].alignment = copy(ws["C23"].alignment)
-                ws["B109"].alignment = copy(ws["C23"].alignment)
+                ws["A107"].alignment = copy(ws["C23"].alignment)
+                ws["B107"].alignment = copy(ws["C23"].alignment)
+                ws["A111"].alignment = copy(ws["C23"].alignment)
+                ws["B111"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=106, max_row=119, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=106, max_row=121, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -617,7 +641,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(104, 120):
+                for row in range(103, 120):
                     ws.row_dimensions[row].height = 15
 
             # For the Leader and Team templates, there will be a 3rd order category
@@ -683,7 +707,7 @@ def main():
 
             # Provide download button for the ZIP file
             st.download_button(
-                label="Download Files",
+                label=f"Clean & Download {len(files_to_download)} Files",
                 data=zip_buffer,
                 file_name="uploaded_files_clean.zip",
                 mime="application/zip"
@@ -693,7 +717,7 @@ def main():
             # Provide download button for a single file
             file_name, file_data = files_to_download[0]
             st.download_button(
-                label="Download File",
+                label="Clean & Download File",
                 data=file_data,
                 file_name=file_name,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
