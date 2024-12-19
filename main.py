@@ -3,7 +3,7 @@ import pandas as pd
 import io
 import zipfile
 import openpyxl
-from openpyxl.styles import Font
+from openpyxl.styles import Font, numbers
 from copy import copy
 import numpy as np
 
@@ -199,29 +199,26 @@ def main():
                 # Move one row below the last filled cell
                 start_row = current_row + 1
 
-                # Insert 12 blank rows after the last row written
+                # Insert blank rows after the last row written
                 ws.insert_rows(current_row, 16)
 
-                # reset the row count to copy / paste values
-                current_row = 22
-                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
-                    current_row += 1  # Move down
-                start_row = current_row + 1
+                # use a custom sort for the summary table
+                first0_summary['1st-Order Category'] = pd.Categorical(
+                    first0_summary['1st-Order Category'], [
+                        "THRIVE", "Just Leader",
+                    ])
+                first0_summary = first0_summary.sort_values(
+                    "1st-Order Category")
 
-                # Write the DataFrame headers to the sheet
-                headers = list(first0_summary.columns)  # Get column headers
+                # header rows
+                ws["A63"] = "1st-Order Category"
+                ws["B63"] = "Avg. Score (%)"
 
-                # Write headers in the first row
-                for col_idx, header in enumerate(headers, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
-
-                # Write the DataFrame contents to the sheet
-                for row_idx, row_data in first0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
-
-                start_row = start_row + 4
+                row = 64  # Starting point
+                for _, row_data in first0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["1st-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 repetitions_2 = [5, 5, 5, 5, 5, 5, 2, 2, 2, 2]
                 category_list_2 = []
@@ -237,19 +234,19 @@ def main():
                         "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
                     ])
                 second0_summary = second0_summary.sort_values(
-                    "2nd-Order Category", ascending=False)
+                    "2nd-Order Category")
 
-                # Write headers in the first row of the new section
-                for col_idx, header in enumerate(second0_summary.columns, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
+                # header rows
+                ws["A67"] = "2nd-Order Category"
+                ws["B67"] = "Avg. Score (%)"
 
-                # Write the DataFrame contents row by row
-                for row_idx, row_data in second0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
+                row = 68  # Starting point
+                for _, row_data in second0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["2nd-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
-                # Define the range of cells
+                # Format the newly-created cells
                 start_row = 24
                 end_row = 77
                 start_col = 1  # Column A (1-indexed)
@@ -262,6 +259,29 @@ def main():
                 for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
                     for cell in row:
                         cell.font = custom_font
+
+                # format the headers
+                ws["A63"].font = Font(name="Arial", size=11, bold=True)
+                ws["B63"].font = Font(name="Arial", size=11, bold=True)
+                ws["A67"].font = Font(name="Arial", size=11, bold=True)
+                ws["B67"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A63"].alignment = copy(ws["C23"].alignment)
+                ws["B63"].alignment = copy(ws["C23"].alignment)
+                ws["A67"].alignment = copy(ws["C23"].alignment)
+                ws["B67"].alignment = copy(ws["C23"].alignment)
+
+                # rounding
+                for row in ws.iter_rows(min_row=64, max_row=77, min_col=2, max_col=2):
+                    for cell in row:
+                        # Check if cell contains a numeric value
+                        if isinstance(cell.value, (int, float)):
+                            # Round to 1 decimal place
+                            cell.number_format = '0.0'
+
+                # row height
+                for row in range(63, 79):
+                    ws.row_dimensions[row].height = 15
 
             elif df.shape[0] == 47:  # No leader template
 
@@ -285,26 +305,23 @@ def main():
                 # Insert 12 blank rows after the last row written
                 ws.insert_rows(current_row, 16)
 
-                # reset the row count to copy / paste values
-                current_row = 22
-                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
-                    current_row += 1  # Move down
-                start_row = current_row + 1
+                # use a custom sort for the summary table
+                first0_summary['1st-Order Category'] = pd.Categorical(
+                    first0_summary['1st-Order Category'], [
+                        "THRIVE", "Just Leader",
+                    ])
+                first0_summary = first0_summary.sort_values(
+                    "1st-Order Category")
 
-                # Write the DataFrame headers to the sheet
-                headers = list(first0_summary.columns)  # Get column headers
+                # header rows
+                ws["A72"] = "1st-Order Category"
+                ws["B72"] = "Avg. Score (%)"
 
-                # Write headers in the first row
-                for col_idx, header in enumerate(headers, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
-
-                # Write the DataFrame contents to the sheet
-                for row_idx, row_data in first0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
-
-                start_row = start_row + 4
+                row = 73  # Starting point
+                for _, row_data in first0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["1st-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 repetitions_2 = [5, 10, 5, 5, 5, 5, 3, 3, 3, 3]
                 category_list_2 = []
@@ -320,17 +337,17 @@ def main():
                         "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
                     ])
                 second0_summary = second0_summary.sort_values(
-                    "2nd-Order Category", ascending=False)
+                    "2nd-Order Category")
 
-                # Write headers in the first row of the new section
-                for col_idx, header in enumerate(second0_summary.columns, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
+                # header rows
+                ws["A76"] = "2nd-Order Category"
+                ws["B76"] = "Avg. Score (%)"
 
-                # Write the DataFrame contents row by row
-                for row_idx, row_data in second0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
+                row = 77  # Starting point
+                for _, row_data in second0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["2nd-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 # Define the range of cells
                 start_row = 24
@@ -345,6 +362,29 @@ def main():
                 for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
                     for cell in row:
                         cell.font = custom_font
+
+                # format the headers
+                ws["A72"].font = Font(name="Arial", size=11, bold=True)
+                ws["B72"].font = Font(name="Arial", size=11, bold=True)
+                ws["A76"].font = Font(name="Arial", size=11, bold=True)
+                ws["B76"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A72"].alignment = copy(ws["C23"].alignment)
+                ws["B72"].alignment = copy(ws["C23"].alignment)
+                ws["A76"].alignment = copy(ws["C23"].alignment)
+                ws["B76"].alignment = copy(ws["C23"].alignment)
+
+                # rounding
+                for row in ws.iter_rows(min_row=73, max_row=86, min_col=2, max_col=2):
+                    for cell in row:
+                        # Check if cell contains a numeric value
+                        if isinstance(cell.value, (int, float)):
+                            # Round to 1 decimal place
+                            cell.number_format = '0.0'
+
+                # row height
+                for row in range(71, 86):
+                    ws.row_dimensions[row].height = 15
 
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
 
@@ -369,26 +409,23 @@ def main():
                 # Insert 12 blank rows after the last row written
                 ws.insert_rows(current_row, 16)
 
-                # reset the row count to copy / paste values
-                current_row = 22
-                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
-                    current_row += 1  # Move down
-                start_row = current_row + 1
+                # use a custom sort for the summary table
+                first0_summary['1st-Order Category'] = pd.Categorical(
+                    first0_summary['1st-Order Category'], [
+                        "THRIVE", "Just Leader",
+                    ])
+                first0_summary = first0_summary.sort_values(
+                    "1st-Order Category")
 
-                # Write the DataFrame headers to the sheet
-                headers = list(first0_summary.columns)  # Get column headers
+                # header rows
+                ws["A105"] = "1st-Order Category"
+                ws["B105"] = "Avg. Score (%)"
 
-                # Write headers in the first row
-                for col_idx, header in enumerate(headers, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
-
-                # Write the DataFrame contents to the sheet
-                for row_idx, row_data in first0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
-
-                start_row = start_row + 4
+                row = 106  # Starting point
+                for _, row_data in first0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["1st-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 # Second level breakdown
                 repetitions_2 = [10, 10, 10, 10, 10, 10, 5, 5, 5, 5]
@@ -405,17 +442,17 @@ def main():
                         "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
                     ])
                 second0_summary = second0_summary.sort_values(
-                    "2nd-Order Category", ascending=False)
+                    "2nd-Order Category")
 
-                # Write headers in the first row of the new section
-                for col_idx, header in enumerate(second0_summary.columns, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
+                # header rows
+                ws["A109"] = "2nd-Order Category"
+                ws["B109"] = "Avg. Score (%)"
 
-                # Write the DataFrame contents row by row
-                for row_idx, row_data in second0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
+                row = 110  # Starting point
+                for _, row_data in second0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["2nd-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 # Third level breakdown
                 repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
@@ -438,6 +475,29 @@ def main():
                 for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
                     for cell in row:
                         cell.font = custom_font
+
+                # format the headers
+                ws["A105"].font = Font(name="Arial", size=11, bold=True)
+                ws["B105"].font = Font(name="Arial", size=11, bold=True)
+                ws["A109"].font = Font(name="Arial", size=11, bold=True)
+                ws["B109"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A105"].alignment = copy(ws["C23"].alignment)
+                ws["B105"].alignment = copy(ws["C23"].alignment)
+                ws["A109"].alignment = copy(ws["C23"].alignment)
+                ws["B109"].alignment = copy(ws["C23"].alignment)
+
+                # rounding
+                for row in ws.iter_rows(min_row=106, max_row=119, min_col=2, max_col=2):
+                    for cell in row:
+                        # Check if cell contains a numeric value
+                        if isinstance(cell.value, (int, float)):
+                            # Round to 1 decimal place
+                            cell.number_format = '0.0'
+
+                # row height
+                for row in range(104, 120):
+                    ws.row_dimensions[row].height = 15
 
             else:  # Team template
 
@@ -462,26 +522,23 @@ def main():
                 # Insert 12 blank rows after the last row written
                 ws.insert_rows(current_row, 16)
 
-                # reset the row count to copy / paste values
-                current_row = 22
-                while ws[f"A{current_row}"].value is not None:  # Check if cell is filled
-                    current_row += 1  # Move down
-                start_row = current_row + 1
+                # use a custom sort for the summary table
+                first0_summary['1st-Order Category'] = pd.Categorical(
+                    first0_summary['1st-Order Category'], [
+                        "THRIVE", "Just Leader",
+                    ])
+                first0_summary = first0_summary.sort_values(
+                    "1st-Order Category")
 
-                # Write the DataFrame headers to the sheet
-                headers = list(first0_summary.columns)  # Get column headers
+                # header rows
+                ws["A105"] = "1st-Order Category"
+                ws["B105"] = "Avg. Score (%)"
 
-                # Write headers in the first row
-                for col_idx, header in enumerate(headers, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
-
-                # Write the DataFrame contents to the sheet
-                for row_idx, row_data in first0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
-
-                start_row = start_row + 4
+                row = 106  # Starting point
+                for _, row_data in first0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["1st-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 # Second level breakdown
                 repetitions_2 = [10, 10, 10, 10, 10, 10, 5, 5, 5, 5]
@@ -498,17 +555,17 @@ def main():
                         "Trust", "Health", "Relationships", "Impact", "Value", "Engagement", "See the Whole Playing Field", "Build Cultural Competency", "Give Power Away", "Take Bold, Courageous Action"
                     ])
                 second0_summary = second0_summary.sort_values(
-                    "2nd-Order Category", ascending=False)
+                    "2nd-Order Category")
 
-                # Write headers in the first row of the new section
-                for col_idx, header in enumerate(second0_summary.columns, start=1):
-                    ws.cell(row=start_row, column=col_idx, value=header)
+                # header rows
+                ws["A109"] = "2nd-Order Category"
+                ws["B109"] = "Avg. Score (%)"
 
-                # Write the DataFrame contents row by row
-                for row_idx, row_data in second0_summary.iterrows():
-                    for col_idx, value in enumerate(row_data, start=1):
-                        ws.cell(row=start_row + row_idx + 1,
-                                column=col_idx, value=value)
+                row = 110  # Starting point
+                for _, row_data in second0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["2nd-Order Category"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
 
                 # Third level breakdown
                 repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
@@ -531,6 +588,29 @@ def main():
                 for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
                     for cell in row:
                         cell.font = custom_font
+
+                # format the headers
+                ws["A105"].font = Font(name="Arial", size=11, bold=True)
+                ws["B105"].font = Font(name="Arial", size=11, bold=True)
+                ws["A109"].font = Font(name="Arial", size=11, bold=True)
+                ws["B109"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A105"].alignment = copy(ws["C23"].alignment)
+                ws["B105"].alignment = copy(ws["C23"].alignment)
+                ws["A109"].alignment = copy(ws["C23"].alignment)
+                ws["B109"].alignment = copy(ws["C23"].alignment)
+
+                # rounding
+                for row in ws.iter_rows(min_row=106, max_row=119, min_col=2, max_col=2):
+                    for cell in row:
+                        # Check if cell contains a numeric value
+                        if isinstance(cell.value, (int, float)):
+                            # Round to 1 decimal place
+                            cell.number_format = '0.0'
+
+                # row height
+                for row in range(104, 120):
+                    ws.row_dimensions[row].height = 15
 
             # For the Leader and Team templates, there will be a 3rd order category
             if template == 'Leader' or template == 'Team':
@@ -567,7 +647,7 @@ def main():
             # any final adjustments to the table
             ws["C23"] = "Avg. Score (%)"
             ws.column_dimensions['A'].width = 50
-            ws.column_dimensions['B'].width = 10
+            ws.column_dimensions['B'].width = 14
             ws.column_dimensions['C'].width = 16
             ws.column_dimensions['D'].width = 14
             ws.column_dimensions['E'].width = 18
