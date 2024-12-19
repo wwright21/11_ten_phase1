@@ -114,6 +114,9 @@ def main():
         # Prepare list to hold file data
         files_to_download = []
 
+        # capture which templates are uploaded
+        templates_list = []
+
         # Iterate through uploaded files
         for uploaded_file in uploaded_files:
             # Read the file into memory
@@ -189,6 +192,7 @@ def main():
             if df.shape[0] == 38:  # Review template
 
                 template = 'Review'
+                templates_list.append(template)
 
                 # fill in the "Category" column
                 repetitions_1 = [30, 8]
@@ -300,6 +304,8 @@ def main():
             elif df.shape[0] == 47:  # No leader template
 
                 template = 'No leader'
+                templates_list.append(template)
+
                 repetitions_1 = [35, 12]
                 category_list_1 = []
                 for category, rep in zip(category_1, repetitions_1):
@@ -409,6 +415,10 @@ def main():
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
 
                 template = 'Leader'
+                templates_list.append(template)
+
+                df_leader = df.copy()
+
                 # First level breakdown
                 repetitions_1 = [60, 20]
                 category_list_1 = []
@@ -556,6 +566,9 @@ def main():
             else:  # Team template
 
                 template = 'Team'
+                templates_list.append(template)
+                df_team = df.copy()
+
                 # First level breakdown
                 repetitions_1 = [60, 20]
                 category_list_1 = []
@@ -725,6 +738,7 @@ def main():
                     row += 1  # Move to the next row
                 ws.column_dimensions['G'].width = 18
 
+            # For the Review and No Leader templates, there will be no 3rd order category
             else:
                 row = 24  # Starting from row 24
                 for idx, row_data in df.iterrows():
@@ -756,6 +770,48 @@ def main():
             # Store the new name and file data
             files_to_download.append((clean_file_name, cleaned_file))
 
+        # If applicable, create the comparison dataframe between Team and Leader
+        if 'Leader' in templates_list and 'Team' in templates_list:
+            # create the comparison dataframe
+            df_comparison = pd.merge(
+                df_leader, df_team, on="Question Order", suffixes=("_Leader", "_Team")).drop(columns=["Difficulty_Leader", "Difficulty_Team"])
+            df_comparison = df_comparison.rename(
+                columns={"Avg. Score (%)_Leader": "Score_Leader", "Avg. Score (%)_Team": "Score_Team"})
+            df_comparison = df_comparison[[
+                'Question Order', 'Questions_Leader', 'Score_Leader', 'Questions_Team', 'Score_Team']]
+            df_comparison['Score_delta'] = df_comparison['Score_Leader'] - \
+                df_comparison['Score_Team']
+            df_comparison = df_comparison.sort_values(
+                by="Score_delta", ascending=False)
+
+            df_comparison_name = "Leader-Team_Comparison.xlsx"
+
+            # Save the dataframe to a BytesIO object in Excel format
+            comparison_file = io.BytesIO()
+            with pd.ExcelWriter(comparison_file, engine='openpyxl') as writer:
+                df_comparison.to_excel(
+                    writer, index=False, sheet_name='Comparison')
+
+                # Access the worksheet to set column widths
+                worksheet = writer.sheets['Comparison']  # Get the worksheet
+                worksheet.column_dimensions['A'].width = 13
+                worksheet.column_dimensions['B'].width = 75
+                worksheet.column_dimensions['C'].width = 13
+                worksheet.column_dimensions['D'].width = 75
+                worksheet.column_dimensions['E'].width = 13
+                worksheet.column_dimensions['F'].width = 13
+
+            # Move to the beginning of the BytesIO buffer
+            comparison_file.seek(0)
+
+            # Append the file to the files_to_download list
+            files_to_download.append((df_comparison_name, comparison_file))
+            st.markdown(f'''
+                <p style="font-size: 18px; font-weight: 100; text-align: center; margin-top: 0px; margin-bottom: 40px; color: #fefefe;">
+                    <i><b>Note:</b> You have uploaded a Leader and a Team template. You will find a comparison file with the zipped bundle in your Downloads folder when you press the button below.</i>
+                </p>
+            ''', unsafe_allow_html=True)
+
         # Handle downloading the files
         if len(files_to_download) > 1:
             # Create a ZIP file for multiple uploads
@@ -767,7 +823,7 @@ def main():
 
             # Provide download button for the ZIP file
             st.download_button(
-                label=f"Clean & Download {len(files_to_download)} Files",
+                label=f"Clean & Download Files",
                 data=zip_buffer,
                 file_name="uploaded_files_clean.zip",
                 mime="application/zip"
