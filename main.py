@@ -211,7 +211,7 @@ def main():
                 ws.insert_rows(current_row, 18)
 
                 # Add the overall average
-                ws["A63"] = "Overall Average"
+                ws["A63"] = "Overall Average (%)"
                 ws["B63"] = overall_avg
 
                 # use a custom sort for the summary table
@@ -320,7 +320,7 @@ def main():
                 ws.insert_rows(current_row, 18)
 
                 # Add the overall average
-                ws["A72"] = "Overall Average"
+                ws["A72"] = "Overall Average (%)"
                 ws["B72"] = overall_avg
 
                 # use a custom sort for the summary table
@@ -427,7 +427,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 18)
+                ws.insert_rows(current_row, 38)
 
                 # Add the overall average
                 ws["A105"] = "Overall Average"
@@ -486,9 +486,33 @@ def main():
                     category_list_3.extend([category] * rep)
                 df['3rd-Order Category'] = category_list_3
 
+                # create 3rd-order contat column
+                third0_summary = df[df['2nd-Order Category'] != 'Health'].groupby(
+                    ['2nd-Order Category', '3rd-Order Category'])['Avg. Score (%)'].mean().reset_index()
+                third0_summary['concat'] = third0_summary['2nd-Order Category'] + \
+                    ' - ' + third0_summary['3rd-Order Category']
+
+                # use a custom sort for the summary table
+                third0_summary['concat'] = pd.Categorical(
+                    third0_summary['concat'], [
+                        "Trust - Leader", "Trust - Team", "Health - Leader", "Health - Team", "Relationships - Leader", "Relationships - Team", "Impact - Leader", "Impact - Team", "Value - Leader", "Value - Team",  "Engagement - Leader", "Engagement - Team",  "See the Whole Playing Field - Leader", "See the Whole Playing Field - Team",  "Build Cultural Competency - Leader", "Build Cultural Competency - Team",  "Give Power Away - Leader", "Give Power Away - Team",  "Take Bold, Courageous Action - Leader", "Take Bold, Courageous Action - Team"
+                    ])
+                third0_summary = third0_summary.sort_values(
+                    "concat")
+
+                # header rows
+                ws["A123"] = "3rd-Order Category"
+                ws["B123"] = "Avg. Score (%)"
+
+                row = 124  # Starting point
+                for _, row_data in third0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["concat"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
+
                 # Define the range of cells
                 start_row = 24
-                end_row = 121
+                end_row = 141
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -503,18 +527,22 @@ def main():
                 # format the headers
                 ws["A105"].font = Font(name="Arial", size=12, bold=True)
                 ws["B105"].font = Font(name="Arial", size=12, bold=True)
-                ws["A107"].font = Font(name="Arial", size=12, bold=True)
-                ws["B107"].font = Font(name="Arial", size=12, bold=True)
+                ws["A107"].font = Font(name="Arial", size=11, bold=True)
+                ws["B107"].font = Font(name="Arial", size=11, bold=True)
                 ws["A111"].font = Font(name="Arial", size=11, bold=True)
                 ws["B111"].font = Font(name="Arial", size=11, bold=True)
+                ws["A123"].font = Font(name="Arial", size=11, bold=True)
+                ws["B123"].font = Font(name="Arial", size=11, bold=True)
 
                 ws["A107"].alignment = copy(ws["C23"].alignment)
                 ws["B107"].alignment = copy(ws["C23"].alignment)
                 ws["A111"].alignment = copy(ws["C23"].alignment)
                 ws["B111"].alignment = copy(ws["C23"].alignment)
+                ws["A123"].alignment = copy(ws["C23"].alignment)
+                ws["B123"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=105, max_row=121, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=105, max_row=141, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -522,7 +550,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(104, 120):
+                for row in range(104, 142):
                     ws.row_dimensions[row].height = 15
 
             else:  # Team template
@@ -546,7 +574,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert blank rows after the last row written
-                ws.insert_rows(current_row, 18)
+                ws.insert_rows(current_row, 38)
 
                 # Add the overall average
                 ws["A105"] = "Overall Average"
@@ -605,9 +633,33 @@ def main():
                     category_list_3.extend([category] * rep)
                 df['3rd-Order Category'] = category_list_3
 
+                # create 3rd-order contat column
+                third0_summary = df[df['2nd-Order Category'] != 'Health'].groupby(
+                    ['2nd-Order Category', '3rd-Order Category'])['Avg. Score (%)'].mean().reset_index()
+                third0_summary['concat'] = third0_summary['2nd-Order Category'] + \
+                    ' - ' + third0_summary['3rd-Order Category']
+
+                # use a custom sort for the summary table
+                third0_summary['concat'] = pd.Categorical(
+                    third0_summary['concat'], [
+                        "Trust - Leader", "Trust - Team", "Health - Leader", "Health - Team", "Relationships - Leader", "Relationships - Team", "Impact - Leader", "Impact - Team", "Value - Leader", "Value - Team",  "Engagement - Leader", "Engagement - Team",  "See the Whole Playing Field - Leader", "See the Whole Playing Field - Team",  "Build Cultural Competency - Leader", "Build Cultural Competency - Team",  "Give Power Away - Leader", "Give Power Away - Team",  "Take Bold, Courageous Action - Leader", "Take Bold, Courageous Action - Team"
+                    ])
+                third0_summary = third0_summary.sort_values(
+                    "concat")
+
+                # header rows
+                ws["A123"] = "3rd-Order Category"
+                ws["B123"] = "Avg. Score (%)"
+
+                row = 124  # Starting point
+                for _, row_data in third0_summary.iterrows():
+                    ws[f"A{row}"] = row_data["concat"]
+                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                    row += 1  # Move to the next row
+
                 # Define the range of cells
                 start_row = 24
-                end_row = 121
+                end_row = 141
                 start_col = 1  # Column A (1-indexed)
                 end_col = 7  # Column C (1-indexed)
 
@@ -626,14 +678,18 @@ def main():
                 ws["B107"].font = Font(name="Arial", size=11, bold=True)
                 ws["A111"].font = Font(name="Arial", size=11, bold=True)
                 ws["B111"].font = Font(name="Arial", size=11, bold=True)
+                ws["A123"].font = Font(name="Arial", size=11, bold=True)
+                ws["B123"].font = Font(name="Arial", size=11, bold=True)
 
                 ws["A107"].alignment = copy(ws["C23"].alignment)
                 ws["B107"].alignment = copy(ws["C23"].alignment)
                 ws["A111"].alignment = copy(ws["C23"].alignment)
                 ws["B111"].alignment = copy(ws["C23"].alignment)
+                ws["A123"].alignment = copy(ws["C23"].alignment)
+                ws["B123"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=106, max_row=121, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=105, max_row=141, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -641,7 +697,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(103, 120):
+                for row in range(104, 142):
                     ws.row_dimensions[row].height = 15
 
             # For the Leader and Team templates, there will be a 3rd order category
@@ -652,6 +708,10 @@ def main():
                 ws["G23"].font = copy(ws["C23"].font)
                 ws["G23"].fill = copy(ws["C23"].fill)
                 ws["G23"].alignment = copy(ws["C23"].alignment)
+
+                # remove 3rd-order category when 2nd-order == 'Health'
+                df["3rd-Order Category"] = np.where(
+                    df["2nd-Order Category"] == 'Health', 'n/a', df["3rd-Order Category"])
 
                 row = 24  # Starting from row 24
                 for idx, row_data in df.iterrows():
@@ -683,7 +743,7 @@ def main():
             ws.column_dimensions['C'].width = 16
             ws.column_dimensions['D'].width = 14
             ws.column_dimensions['E'].width = 18
-            ws.column_dimensions['F'].width = 18
+            ws.column_dimensions['F'].width = 26
 
             # Add "_clean" suffix to the file name before the extension
             clean_file_name = f"{uploaded_file.name.rsplit('.', 1)[0]}_clean.xlsx"
