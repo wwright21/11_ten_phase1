@@ -3,7 +3,8 @@ import pandas as pd
 import io
 import zipfile
 import openpyxl
-from openpyxl.styles import Font, numbers
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
 from copy import copy
 import numpy as np
 
@@ -289,7 +290,7 @@ def main():
                 ws["A69"].alignment = copy(ws["C23"].alignment)
                 ws["B69"].alignment = copy(ws["C23"].alignment)
 
-                # rounding
+                # rounding - summary tables
                 for row in ws.iter_rows(min_row=63, max_row=79, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
@@ -300,6 +301,33 @@ def main():
                 # row height
                 for row in range(63, 79):
                     ws.row_dimensions[row].height = 15
+
+                # get standard deviation values in template
+                std_dev_values = []
+
+                # Start iterating from the first cell in column C
+                column = 3  # Column C
+                row = 1  # Start at the first row
+                max_row = 5000
+
+                # Iterate through column C until the end
+                while row <= max_row:
+                    cell_value = ws.cell(row=row, column=column).value
+
+                    # Check if the cell contains 'Standard Deviation'
+                    if cell_value == "Standard Deviation":
+                        # Get the value in the cell below
+                        next_cell_value = ws.cell(
+                            row=row + 1, column=column).value
+                        # if next_cell_value is not None, append to std_dev_values
+                        if next_cell_value is not None:
+                            std_dev_values.append(next_cell_value)
+
+                        # Move the row pointer down by 2 to skip the value we just processed
+                        row += 2
+                    else:
+                        # Move to the next row
+                        row += 1
 
             elif df.shape[0] == 47:  # No leader template
 
@@ -411,6 +439,34 @@ def main():
                 # row height
                 for row in range(71, 88):
                     ws.row_dimensions[row].height = 15
+
+                # get standard deviation values in template
+                std_dev_values = []
+
+                # Start iterating from the first cell in column C
+                column = 3  # Column C
+                row = 1  # Start at the first row
+                max_row = 5000
+
+                # Iterate through column C until the end
+                while row <= max_row:
+                    cell_value = ws.cell(row=row, column=column).value
+
+                    # Check if the cell contains 'Standard Deviation'
+                    if cell_value == "Standard Deviation":
+                        # Get the value in the cell below
+                        next_cell_value = ws.cell(
+                            row=row + 1, column=column).value
+                        # if next_cell_value is not None, append to std_dev_values as a float
+                        if next_cell_value is not None:
+                            next_cell_value = float(next_cell_value)
+                            std_dev_values.append(next_cell_value)
+
+                        # Move the row pointer down by 2 to skip the value we just processed
+                        row += 2
+                    else:
+                        # Move to the next row
+                        row += 1
 
             elif str(df["Questions"].iloc[0]).startswith("Q7"):  # Leader template
 
@@ -701,7 +757,7 @@ def main():
                 ws["A123"].alignment = copy(ws["C23"].alignment)
                 ws["B123"].alignment = copy(ws["C23"].alignment)
 
-                # rounding
+                # rounding - Column B
                 for row in ws.iter_rows(min_row=105, max_row=141, min_col=2, max_col=2):
                     for cell in row:
                         # Check if cell contains a numeric value
@@ -712,6 +768,34 @@ def main():
                 # row height
                 for row in range(104, 142):
                     ws.row_dimensions[row].height = 15
+
+                # get standard deviation values in template
+                std_dev_values = []
+
+                # Start iterating from the first cell in column C
+                column = 3  # Column C
+                row = 1  # Start at the first row
+                max_row = 5000
+
+                # Iterate through column C until the end
+                while row <= max_row:
+                    cell_value = ws.cell(row=row, column=column).value
+
+                    # Check if the cell contains 'Standard Deviation'
+                    if cell_value == "Standard Deviation":
+                        # Get the value in the cell below
+                        next_cell_value = ws.cell(
+                            row=row + 1, column=column).value
+                        # if next_cell_value is not None, append to std_dev_values as a float
+                        if next_cell_value is not None:
+                            next_cell_value = float(next_cell_value)
+                            std_dev_values.append(next_cell_value)
+
+                        # Move the row pointer down by 2 to skip the value we just processed
+                        row += 2
+                    else:
+                        # Move to the next row
+                        row += 1
 
             # For the Leader and Team templates, there will be a 3rd order category
             if template == 'Leader' or template == 'Team':
@@ -750,14 +834,61 @@ def main():
                     ws[f"F{row}"] = row_data["2nd-Order Category"]
                     row += 1  # Move to the next row
 
+            # for only the Team, Review, and No Leader templates, shift data over
+            if template != 'Leader':
+                # Find the data range starting from D23
+                start_row = 23
+                start_col = 4  # Column D
+
+                # Find the last row in column D (stop when an empty cell is encountered)
+                end_row = start_row
+                while ws.cell(row=end_row, column=start_col).value is not None:
+                    end_row += 1
+                end_row -= 1  # Adjust to the last filled row
+
+                # Find the last column (stop when an empty cell is encountered in the header row)
+                end_col = start_col
+                while ws.cell(row=start_row, column=end_col).value is not None:
+                    end_col += 1
+                end_col -= 1  # Adjust to the last filled column
+
+                # Shift data one column to the right
+                for row in range(start_row, end_row + 1):
+                    # Move backward to avoid overwriting
+                    for col in range(end_col, start_col - 1, -1):
+                        source_cell = ws.cell(row=row, column=col)
+                        target_cell = ws.cell(row=row, column=col + 1)
+
+                        # Copy value
+                        target_cell.value = source_cell.value
+
+                        # Copy style if present
+                        if source_cell.has_style:
+                            target_cell._style = source_cell._style
+
+                        # Clear the original cell
+                        source_cell.value = None
+
+                # Now input the standard deviation values
+                ws["D23"] = "Standard deviation"
+                start_row = 24
+                start_column = 4  # Column D
+
+                # Write the values from the list into column D, starting at D24
+                for i, value in enumerate(std_dev_values):
+                    cell = ws.cell(row=start_row + i, column=start_column)
+                    cell.value = value
+
             # any final adjustments to the table
             ws["C23"] = "Avg. Score (%)"
             ws.column_dimensions['A'].width = 50
             ws.column_dimensions['B'].width = 14
-            ws.column_dimensions['C'].width = 16
-            ws.column_dimensions['D'].width = 14
-            ws.column_dimensions['E'].width = 18
-            ws.column_dimensions['F'].width = 26
+            ws.column_dimensions['C'].width = 17
+            ws.column_dimensions['D'].width = 17
+            ws.column_dimensions['E'].width = 14
+            ws.column_dimensions['F'].width = 19
+            ws.column_dimensions['G'].width = 19
+            ws.column_dimensions['H'].width = 19
 
             # Add "_clean" suffix to the file name before the extension
             clean_file_name = f"{uploaded_file.name.rsplit('.', 1)[0]}_clean.xlsx"
@@ -813,8 +944,7 @@ def main():
             ''', unsafe_allow_html=True)
 
         # Handle downloading the files
-        if len(files_to_download) > 1:
-            # Create a ZIP file for multiple uploads
+        if len(files_to_download) > 1:  # Create a ZIP file for multiple uploads
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, "w") as zip_file:
                 for file_name, file_data in files_to_download:
@@ -829,8 +959,7 @@ def main():
                 mime="application/zip"
             )
 
-        else:
-            # Provide download button for a single file
+        else:  # Provide download button for a single file
             file_name, file_data = files_to_download[0]
             st.download_button(
                 label="Clean & Download File",
