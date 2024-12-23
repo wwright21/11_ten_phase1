@@ -213,7 +213,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert blank rows after the last row written
-                ws.insert_rows(current_row, 18)
+                ws.insert_rows(current_row, 10)
 
                 # Add the overall average
                 ws["A63"] = "Overall Average (%)"
@@ -227,14 +227,21 @@ def main():
                 first0_summary = first0_summary.sort_values(
                     "1st-Order Category")
 
-                # header rows
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                first0_new = first0_summary.set_index("1st-Order Category").T
+
+                # header column
                 ws["A65"] = "1st-Order Category"
-                ws["B65"] = "Avg. Score (%)"
+                ws["A66"] = "Avg. Score (%)"
+
+                # copy in heading labels
+                ws["B65"] = "THRIVE"
+                ws["C65"] = "Just Leader"
 
                 row = 66  # Starting point
-                for _, row_data in first0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["1st-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                for _, row_data in first0_new.iterrows():
+                    ws[f"B{row}"] = row_data["THRIVE"]
+                    ws[f"C{row}"] = row_data["Just Leader"]
                     row += 1  # Move to the next row
 
                 repetitions_2 = [5, 5, 5, 5, 5, 5, 2, 2, 2, 2]
@@ -255,19 +262,43 @@ def main():
 
                 # header rows
                 ws["A69"] = "2nd-Order Category"
-                ws["B69"] = "Avg. Score (%)"
+                ws["A70"] = "Avg. Score (%)"
 
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                second0_new = second0_summary.set_index("2nd-Order Category").T
+
+                # New code for wide format
                 row = 70  # Starting point
-                for _, row_data in second0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["2nd-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                for _, row_data in second0_new.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Health"]
+                    ws[f"D{row}"] = row_data["Relationships"]
+                    ws[f"E{row}"] = row_data["Impact"]
+                    ws[f"F{row}"] = row_data["Value"]
+                    ws[f"G{row}"] = row_data["Engagement"]
+                    ws[f"H{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"I{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"J{row}"] = row_data["Give Power Away"]
+                    ws[f"K{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 2nd-Order Category labels
+                ws["B69"] = "Trust"
+                ws["C69"] = "Health"
+                ws["D69"] = "Relationships"
+                ws["E69"] = "Impact"
+                ws["F69"] = "Value"
+                ws["G69"] = "Engagement"
+                ws["H69"] = "See the Whole Playing Field"
+                ws["I69"] = "Build Cultural Competency"
+                ws["J69"] = "Give Power Away"
+                ws["K69"] = "Take Bold, Courageous Action"
 
                 # Format the newly-created cells
                 start_row = 24
-                end_row = 79
+                end_row = 71
                 start_col = 1  # Column A (1-indexed)
-                end_col = 7  # Column C (1-indexed)
+                end_col = 11
 
                 # Define the font style
                 custom_font = Font(name="Arial", size=11)
@@ -277,21 +308,26 @@ def main():
                     for cell in row:
                         cell.font = custom_font
 
-                # format the headers
+                # format the headers - Overall average
                 ws["A63"].font = Font(name="Arial", size=12, bold=True)
                 ws["B63"].font = Font(name="Arial", size=12, bold=True)
-                ws["A65"].font = Font(name="Arial", size=11, bold=True)
-                ws["B65"].font = Font(name="Arial", size=11, bold=True)
-                ws["A69"].font = Font(name="Arial", size=11, bold=True)
-                ws["B69"].font = Font(name="Arial", size=11, bold=True)
 
+                # First-Order Average
+                ws["A65"].font = Font(name="Arial", size=11, bold=True)
+                ws["A66"].font = Font(name="Arial", size=11, bold=True)
+
+                # Second-Order Average
+                ws["A69"].font = Font(name="Arial", size=11, bold=True)
+                ws["A70"].font = Font(name="Arial", size=11, bold=True)
+
+                # Center alignment
                 ws["A65"].alignment = copy(ws["C23"].alignment)
-                ws["B65"].alignment = copy(ws["C23"].alignment)
+                ws["A66"].alignment = copy(ws["C23"].alignment)
                 ws["A69"].alignment = copy(ws["C23"].alignment)
-                ws["B69"].alignment = copy(ws["C23"].alignment)
+                ws["A70"].alignment = copy(ws["C23"].alignment)
 
                 # rounding - summary tables
-                for row in ws.iter_rows(min_row=63, max_row=79, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=63, max_row=71, min_col=2, max_col=11):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -299,7 +335,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(63, 79):
+                for row in range(63, 71):
                     ws.row_dimensions[row].height = 15
 
                 # get standard deviation values in template
@@ -310,7 +346,7 @@ def main():
                 row = 1  # Start at the first row
                 max_row = 5000
 
-                # Iterate through column C until the end
+                # Iterate through column C until the end and collect STD values
                 while row <= max_row:
                     cell_value = ws.cell(row=row, column=column).value
 
@@ -351,7 +387,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 18)
+                ws.insert_rows(current_row, 8)
 
                 # Add the overall average
                 ws["A72"] = "Overall Average (%)"
@@ -365,14 +401,21 @@ def main():
                 first0_summary = first0_summary.sort_values(
                     "1st-Order Category")
 
-                # header rows
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                first0_new = first0_summary.set_index("1st-Order Category").T
+
+                # header column
                 ws["A74"] = "1st-Order Category"
-                ws["B74"] = "Avg. Score (%)"
+                ws["A75"] = "Avg. Score (%)"
+
+                # copy in heading labels
+                ws["B74"] = "THRIVE"
+                ws["C74"] = "Just Leader"
 
                 row = 75  # Starting point
-                for _, row_data in first0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["1st-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                for _, row_data in first0_new.iterrows():
+                    ws[f"B{row}"] = row_data["THRIVE"]
+                    ws[f"C{row}"] = row_data["Just Leader"]
                     row += 1  # Move to the next row
 
                 repetitions_2 = [5, 10, 5, 5, 5, 5, 3, 3, 3, 3]
@@ -392,20 +435,44 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A78"] = "2nd-Order Category"
-                ws["B78"] = "Avg. Score (%)"
+                ws["A77"] = "2nd-Order Category"
+                ws["A78"] = "Avg. Score (%)"
 
-                row = 79  # Starting point
-                for _, row_data in second0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["2nd-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                second0_new = second0_summary.set_index("2nd-Order Category").T
+
+                # New code for wide format
+                row = 78  # Starting point
+                for _, row_data in second0_new.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Health"]
+                    ws[f"D{row}"] = row_data["Relationships"]
+                    ws[f"E{row}"] = row_data["Impact"]
+                    ws[f"F{row}"] = row_data["Value"]
+                    ws[f"G{row}"] = row_data["Engagement"]
+                    ws[f"H{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"I{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"J{row}"] = row_data["Give Power Away"]
+                    ws[f"K{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 2nd-Order Category labels
+                ws["B77"] = "Trust"
+                ws["C77"] = "Health"
+                ws["D77"] = "Relationships"
+                ws["E77"] = "Impact"
+                ws["F77"] = "Value"
+                ws["G77"] = "Engagement"
+                ws["H77"] = "See the Whole Playing Field"
+                ws["I77"] = "Build Cultural Competency"
+                ws["J77"] = "Give Power Away"
+                ws["K77"] = "Take Bold, Courageous Action"
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 88
+                end_row = 79
                 start_col = 1  # Column A (1-indexed)
-                end_col = 7  # Column C (1-indexed)
+                end_col = 11  # Column C (1-indexed)
 
                 # Define the font style
                 custom_font = Font(name="Arial", size=11)
@@ -415,21 +482,25 @@ def main():
                     for cell in row:
                         cell.font = custom_font
 
-                # format the headers
+                # format the headers - overall average
                 ws["A72"].font = Font(name="Arial", size=12, bold=True)
                 ws["B72"].font = Font(name="Arial", size=12, bold=True)
+
+                # First-Order Average
                 ws["A74"].font = Font(name="Arial", size=11, bold=True)
-                ws["B74"].font = Font(name="Arial", size=11, bold=True)
+                ws["A75"].font = Font(name="Arial", size=11, bold=True)
+
+                # Second-Order Average
+                ws["A77"].font = Font(name="Arial", size=11, bold=True)
                 ws["A78"].font = Font(name="Arial", size=11, bold=True)
-                ws["B78"].font = Font(name="Arial", size=11, bold=True)
 
                 ws["A74"].alignment = copy(ws["C23"].alignment)
-                ws["B74"].alignment = copy(ws["C23"].alignment)
+                ws["A75"].alignment = copy(ws["C23"].alignment)
+                ws["A77"].alignment = copy(ws["C23"].alignment)
                 ws["A78"].alignment = copy(ws["C23"].alignment)
-                ws["B78"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=72, max_row=88, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=72, max_row=79, min_col=2, max_col=11):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -437,7 +508,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(71, 88):
+                for row in range(71, 79):
                     ws.row_dimensions[row].height = 15
 
                 # get standard deviation values in template
@@ -834,7 +905,7 @@ def main():
                     ws[f"F{row}"] = row_data["2nd-Order Category"]
                     row += 1  # Move to the next row
 
-            # for only the Team, Review, and No Leader templates, shift data over
+            # for only the Team, Review, and No Leader templates, shift data over to make room for the standard deviation values
             if template != 'Leader':
                 # Find the data range starting from D23
                 start_row = 23
@@ -877,7 +948,7 @@ def main():
                 # Write the values from the list into column D, starting at D24
                 for i, value in enumerate(std_dev_values):
                     cell = ws.cell(row=start_row + i, column=start_column)
-                    cell.value = value
+                    cell.value = float(value)
 
             # any final adjustments to the table
             ws["C23"] = "Avg. Score (%)"
@@ -888,7 +959,10 @@ def main():
             ws.column_dimensions['E'].width = 14
             ws.column_dimensions['F'].width = 19
             ws.column_dimensions['G'].width = 19
-            ws.column_dimensions['H'].width = 19
+            ws.column_dimensions['H'].width = 23
+            ws.column_dimensions['I'].width = 22
+            ws.column_dimensions['J'].width = 15
+            ws.column_dimensions['K'].width = 21
 
             # Add "_clean" suffix to the file name before the extension
             clean_file_name = f"{uploaded_file.name.rsplit('.', 1)[0]}_clean.xlsx"
