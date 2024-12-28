@@ -213,7 +213,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert blank rows after the last row written
-                ws.insert_rows(current_row, 10)
+                ws.insert_rows(current_row, 8)
 
                 # Add the overall average
                 ws["A63"] = "Overall Average (%)"
@@ -261,14 +261,14 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A69"] = "2nd-Order Category"
-                ws["A70"] = "Avg. Score (%)"
+                ws["A68"] = "2nd-Order Category"
+                ws["A69"] = "Avg. Score (%)"
 
                 # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
                 second0_new = second0_summary.set_index("2nd-Order Category").T
 
                 # New code for wide format
-                row = 70  # Starting point
+                row = 69  # Starting point
                 for _, row_data in second0_new.iterrows():
                     ws[f"B{row}"] = row_data["Trust"]
                     ws[f"C{row}"] = row_data["Health"]
@@ -283,20 +283,20 @@ def main():
                     row += 1
 
                 # Copy in 2nd-Order Category labels
-                ws["B69"] = "Trust"
-                ws["C69"] = "Health"
-                ws["D69"] = "Relationships"
-                ws["E69"] = "Impact"
-                ws["F69"] = "Value"
-                ws["G69"] = "Engagement"
-                ws["H69"] = "See the Whole Playing Field"
-                ws["I69"] = "Build Cultural Competency"
-                ws["J69"] = "Give Power Away"
-                ws["K69"] = "Take Bold, Courageous Action"
+                ws["B68"] = "Trust"
+                ws["C68"] = "Health"
+                ws["D68"] = "Relationships"
+                ws["E68"] = "Impact"
+                ws["F68"] = "Value"
+                ws["G68"] = "Engagement"
+                ws["H68"] = "See the Whole Playing Field"
+                ws["I68"] = "Build Cultural Competency"
+                ws["J68"] = "Give Power Away"
+                ws["K68"] = "Take Bold, Courageous Action"
 
                 # Format the newly-created cells
                 start_row = 24
-                end_row = 71
+                end_row = 70
                 start_col = 1  # Column A (1-indexed)
                 end_col = 11
 
@@ -317,14 +317,14 @@ def main():
                 ws["A66"].font = Font(name="Arial", size=11, bold=True)
 
                 # Second-Order Average
+                ws["A68"].font = Font(name="Arial", size=11, bold=True)
                 ws["A69"].font = Font(name="Arial", size=11, bold=True)
-                ws["A70"].font = Font(name="Arial", size=11, bold=True)
 
                 # Center alignment
                 ws["A65"].alignment = copy(ws["C23"].alignment)
                 ws["A66"].alignment = copy(ws["C23"].alignment)
+                ws["A68"].alignment = copy(ws["C23"].alignment)
                 ws["A69"].alignment = copy(ws["C23"].alignment)
-                ws["A70"].alignment = copy(ws["C23"].alignment)
 
                 # rounding - summary tables
                 for row in ws.iter_rows(min_row=63, max_row=71, min_col=2, max_col=11):
@@ -564,7 +564,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert 12 blank rows after the last row written
-                ws.insert_rows(current_row, 38)
+                ws.insert_rows(current_row, 12)
 
                 # Add the overall average
                 ws["A105"] = "Overall Average"
@@ -578,14 +578,21 @@ def main():
                 first0_summary = first0_summary.sort_values(
                     "1st-Order Category")
 
-                # header rows
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                first0_new = first0_summary.set_index("1st-Order Category").T
+
+                # header column
                 ws["A107"] = "1st-Order Category"
-                ws["B107"] = "Avg. Score (%)"
+                ws["A108"] = "Avg. Score (%)"
+
+                # copy in heading labels
+                ws["B107"] = "THRIVE"
+                ws["C107"] = "Just Leader"
 
                 row = 108  # Starting point
-                for _, row_data in first0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["1st-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                for _, row_data in first0_new.iterrows():
+                    ws[f"B{row}"] = row_data["THRIVE"]
+                    ws[f"C{row}"] = row_data["Just Leader"]
                     row += 1  # Move to the next row
 
                 # Second level breakdown
@@ -606,14 +613,38 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A111"] = "2nd-Order Category"
-                ws["B111"] = "Avg. Score (%)"
+                ws["A110"] = "2nd-Order Category"
+                ws["A111"] = "Avg. Score (%)"
 
-                row = 112  # Starting point
-                for _, row_data in second0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["2nd-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                second0_new = second0_summary.set_index("2nd-Order Category").T
+
+                # New code for wide format
+                row = 111  # Starting point
+                for _, row_data in second0_new.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Health"]
+                    ws[f"D{row}"] = row_data["Relationships"]
+                    ws[f"E{row}"] = row_data["Impact"]
+                    ws[f"F{row}"] = row_data["Value"]
+                    ws[f"G{row}"] = row_data["Engagement"]
+                    ws[f"H{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"I{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"J{row}"] = row_data["Give Power Away"]
+                    ws[f"K{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 2nd-Order Category labels
+                ws["B110"] = "Trust"
+                ws["C110"] = "Health"
+                ws["D110"] = "Relationships"
+                ws["E110"] = "Impact"
+                ws["F110"] = "Value"
+                ws["G110"] = "Engagement"
+                ws["H110"] = "See the Whole Playing Field"
+                ws["I110"] = "Build Cultural Competency"
+                ws["J110"] = "Give Power Away"
+                ws["K110"] = "Take Bold, Courageous Action"
 
                 # Third level breakdown
                 repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
@@ -626,32 +657,64 @@ def main():
                 # create 3rd-order contat column
                 third0_summary = df[df['2nd-Order Category'] != 'Health'].groupby(
                     ['2nd-Order Category', '3rd-Order Category'])['Avg. Score (%)'].mean().reset_index()
-                third0_summary['concat'] = third0_summary['2nd-Order Category'] + \
-                    ' - ' + third0_summary['3rd-Order Category']
-
-                # use a custom sort for the summary table
-                third0_summary['concat'] = pd.Categorical(
-                    third0_summary['concat'], [
-                        "Trust - Leader", "Trust - Team", "Health - Leader", "Health - Team", "Relationships - Leader", "Relationships - Team", "Impact - Leader", "Impact - Team", "Value - Leader", "Value - Team",  "Engagement - Leader", "Engagement - Team",  "See the Whole Playing Field - Leader", "See the Whole Playing Field - Team",  "Build Cultural Competency - Leader", "Build Cultural Competency - Team",  "Give Power Away - Leader", "Give Power Away - Team",  "Take Bold, Courageous Action - Leader", "Take Bold, Courageous Action - Team"
-                    ])
-                third0_summary = third0_summary.sort_values(
-                    "concat")
 
                 # header rows
-                ws["A123"] = "3rd-Order Category"
-                ws["B123"] = "Avg. Score (%)"
+                ws["A113"] = "3rd-Order Category"
+                ws["A114"] = "Leader Avg. Score (%)"
+                ws["A115"] = "Team Avg. Score (%)"
 
-                row = 124  # Starting point
-                for _, row_data in third0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["concat"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                # Per Uncle David's request, show 3rd-order category averages in wide format instead of long format
+                third0_leader = third0_summary[third0_summary['3rd-Order Category']
+                                               == 'Leader'].drop(columns='3rd-Order Category')
+                third0_leader = third0_leader.set_index("2nd-Order Category").T
+
+                # New code for wide format
+                row = 114  # Starting point
+                for _, row_data in third0_leader.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Relationships"]
+                    ws[f"D{row}"] = row_data["Impact"]
+                    ws[f"E{row}"] = row_data["Value"]
+                    ws[f"F{row}"] = row_data["Engagement"]
+                    ws[f"G{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"H{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"I{row}"] = row_data["Give Power Away"]
+                    ws[f"J{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                third0_team = third0_summary[third0_summary['3rd-Order Category']
+                                             == 'Team'].drop(columns='3rd-Order Category')
+                third0_team = third0_team.set_index("2nd-Order Category").T
+
+                row = 115  # Starting point
+                for _, row_data in third0_team.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Relationships"]
+                    ws[f"D{row}"] = row_data["Impact"]
+                    ws[f"E{row}"] = row_data["Value"]
+                    ws[f"F{row}"] = row_data["Engagement"]
+                    ws[f"G{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"H{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"I{row}"] = row_data["Give Power Away"]
+                    ws[f"J{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 3rd-Order Category labels
+                ws["B113"] = "Trust"
+                ws["C113"] = "Relationships"
+                ws["D113"] = "Impact"
+                ws["E113"] = "Value"
+                ws["F113"] = "Engagement"
+                ws["G113"] = "See the Whole Playing Field"
+                ws["H113"] = "Build Cultural Competency"
+                ws["I113"] = "Give Power Away"
+                ws["J113"] = "Take Bold, Courageous Action"
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 141
+                end_row = 116
                 start_col = 1  # Column A (1-indexed)
-                end_col = 7  # Column C (1-indexed)
+                end_col = 11  # Column C (1-indexed)
 
                 # Define the font style
                 custom_font = Font(name="Arial", size=11)
@@ -664,22 +727,28 @@ def main():
                 # format the headers
                 ws["A105"].font = Font(name="Arial", size=12, bold=True)
                 ws["B105"].font = Font(name="Arial", size=12, bold=True)
+
                 ws["A107"].font = Font(name="Arial", size=11, bold=True)
-                ws["B107"].font = Font(name="Arial", size=11, bold=True)
+                ws["A108"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A110"].font = Font(name="Arial", size=11, bold=True)
                 ws["A111"].font = Font(name="Arial", size=11, bold=True)
-                ws["B111"].font = Font(name="Arial", size=11, bold=True)
-                ws["A123"].font = Font(name="Arial", size=11, bold=True)
-                ws["B123"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A113"].font = Font(name="Arial", size=11, bold=True)
+                ws["A114"].font = Font(name="Arial", size=11, bold=True)
+                ws["A115"].font = Font(name="Arial", size=11, bold=True)
 
                 ws["A107"].alignment = copy(ws["C23"].alignment)
-                ws["B107"].alignment = copy(ws["C23"].alignment)
+                ws["A108"].alignment = copy(ws["C23"].alignment)
+
+                ws["A110"].alignment = copy(ws["C23"].alignment)
                 ws["A111"].alignment = copy(ws["C23"].alignment)
-                ws["B111"].alignment = copy(ws["C23"].alignment)
-                ws["A123"].alignment = copy(ws["C23"].alignment)
-                ws["B123"].alignment = copy(ws["C23"].alignment)
+                ws["A113"].alignment = copy(ws["C23"].alignment)
+                ws["A114"].alignment = copy(ws["C23"].alignment)
+                ws["A115"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=105, max_row=141, min_col=2, max_col=2):
+                for row in ws.iter_rows(min_row=105, max_row=116, min_col=2, max_col=11):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -687,7 +756,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(104, 142):
+                for row in range(104, 116):
                     ws.row_dimensions[row].height = 15
 
             else:  # Team template
@@ -714,7 +783,7 @@ def main():
                 start_row = current_row + 1
 
                 # Insert blank rows after the last row written
-                ws.insert_rows(current_row, 38)
+                ws.insert_rows(current_row, 12)
 
                 # Add the overall average
                 ws["A105"] = "Overall Average"
@@ -728,14 +797,21 @@ def main():
                 first0_summary = first0_summary.sort_values(
                     "1st-Order Category")
 
-                # header rows
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                first0_new = first0_summary.set_index("1st-Order Category").T
+
+                # header column
                 ws["A107"] = "1st-Order Category"
-                ws["B107"] = "Avg. Score (%)"
+                ws["A108"] = "Avg. Score (%)"
+
+                # copy in heading labels
+                ws["B107"] = "THRIVE"
+                ws["C107"] = "Just Leader"
 
                 row = 108  # Starting point
-                for _, row_data in first0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["1st-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
+                for _, row_data in first0_new.iterrows():
+                    ws[f"B{row}"] = row_data["THRIVE"]
+                    ws[f"C{row}"] = row_data["Just Leader"]
                     row += 1  # Move to the next row
 
                 # Second level breakdown
@@ -756,14 +832,38 @@ def main():
                     "2nd-Order Category")
 
                 # header rows
-                ws["A111"] = "2nd-Order Category"
-                ws["B111"] = "Avg. Score (%)"
+                ws["A110"] = "2nd-Order Category"
+                ws["A111"] = "Avg. Score (%)"
 
-                row = 112  # Starting point
-                for _, row_data in second0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["2nd-Order Category"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                # Per Uncle David's request, show 2nd-order category averages in wide format instead of long format
+                second0_new = second0_summary.set_index("2nd-Order Category").T
+
+                # New code for wide format
+                row = 111  # Starting point
+                for _, row_data in second0_new.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Health"]
+                    ws[f"D{row}"] = row_data["Relationships"]
+                    ws[f"E{row}"] = row_data["Impact"]
+                    ws[f"F{row}"] = row_data["Value"]
+                    ws[f"G{row}"] = row_data["Engagement"]
+                    ws[f"H{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"I{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"J{row}"] = row_data["Give Power Away"]
+                    ws[f"K{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 2nd-Order Category labels
+                ws["B110"] = "Trust"
+                ws["C110"] = "Health"
+                ws["D110"] = "Relationships"
+                ws["E110"] = "Impact"
+                ws["F110"] = "Value"
+                ws["G110"] = "Engagement"
+                ws["H110"] = "See the Whole Playing Field"
+                ws["I110"] = "Build Cultural Competency"
+                ws["J110"] = "Give Power Away"
+                ws["K110"] = "Take Bold, Courageous Action"
 
                 # Third level breakdown
                 repetitions_3 = [5, 5, 5, 5, 5, 5, 5, 5,
@@ -776,32 +876,65 @@ def main():
                 # create 3rd-order contat column
                 third0_summary = df[df['2nd-Order Category'] != 'Health'].groupby(
                     ['2nd-Order Category', '3rd-Order Category'])['Avg. Score (%)'].mean().reset_index()
-                third0_summary['concat'] = third0_summary['2nd-Order Category'] + \
-                    ' - ' + third0_summary['3rd-Order Category']
-
-                # use a custom sort for the summary table
-                third0_summary['concat'] = pd.Categorical(
-                    third0_summary['concat'], [
-                        "Trust - Leader", "Trust - Team", "Health - Leader", "Health - Team", "Relationships - Leader", "Relationships - Team", "Impact - Leader", "Impact - Team", "Value - Leader", "Value - Team",  "Engagement - Leader", "Engagement - Team",  "See the Whole Playing Field - Leader", "See the Whole Playing Field - Team",  "Build Cultural Competency - Leader", "Build Cultural Competency - Team",  "Give Power Away - Leader", "Give Power Away - Team",  "Take Bold, Courageous Action - Leader", "Take Bold, Courageous Action - Team"
-                    ])
-                third0_summary = third0_summary.sort_values(
-                    "concat")
 
                 # header rows
-                ws["A123"] = "3rd-Order Category"
-                ws["B123"] = "Avg. Score (%)"
+                ws["A113"] = "3rd-Order Category"
+                ws["A114"] = "Leader Avg. Score (%)"
+                ws["A115"] = "Team Avg. Score (%)"
 
-                row = 124  # Starting point
-                for _, row_data in third0_summary.iterrows():
-                    ws[f"A{row}"] = row_data["concat"]
-                    ws[f"B{row}"] = row_data["Avg. Score (%)"]
-                    row += 1  # Move to the next row
+                # Per Uncle David's request, show 3rd-order category averages in wide format instead of long format
+                third0_leader = third0_summary[third0_summary['3rd-Order Category']
+                                               == 'Leader'].drop(columns='3rd-Order Category')
+                third0_leader = third0_leader.set_index("2nd-Order Category").T
+                third0_leader.to_csv('third0_leader.csv', index=False)
+
+                # New code for wide format
+                row = 114  # Starting point
+                for _, row_data in third0_leader.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Relationships"]
+                    ws[f"D{row}"] = row_data["Impact"]
+                    ws[f"E{row}"] = row_data["Value"]
+                    ws[f"F{row}"] = row_data["Engagement"]
+                    ws[f"G{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"H{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"I{row}"] = row_data["Give Power Away"]
+                    ws[f"J{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                third0_team = third0_summary[third0_summary['3rd-Order Category']
+                                             == 'Team'].drop(columns='3rd-Order Category')
+                third0_team = third0_team.set_index("2nd-Order Category").T
+
+                row = 115  # Starting point
+                for _, row_data in third0_team.iterrows():
+                    ws[f"B{row}"] = row_data["Trust"]
+                    ws[f"C{row}"] = row_data["Relationships"]
+                    ws[f"D{row}"] = row_data["Impact"]
+                    ws[f"E{row}"] = row_data["Value"]
+                    ws[f"F{row}"] = row_data["Engagement"]
+                    ws[f"G{row}"] = row_data["See the Whole Playing Field"]
+                    ws[f"H{row}"] = row_data["Build Cultural Competency"]
+                    ws[f"I{row}"] = row_data["Give Power Away"]
+                    ws[f"J{row}"] = row_data["Take Bold, Courageous Action"]
+                    row += 1
+
+                # Copy in 3rd-Order Category labels
+                ws["B113"] = "Trust"
+                ws["C113"] = "Relationships"
+                ws["D113"] = "Impact"
+                ws["E113"] = "Value"
+                ws["F113"] = "Engagement"
+                ws["G113"] = "See the Whole Playing Field"
+                ws["H113"] = "Build Cultural Competency"
+                ws["I113"] = "Give Power Away"
+                ws["J113"] = "Take Bold, Courageous Action"
 
                 # Define the range of cells
                 start_row = 24
-                end_row = 141
+                end_row = 116
                 start_col = 1  # Column A (1-indexed)
-                end_col = 7  # Column C (1-indexed)
+                end_col = 11  # Column C (1-indexed)
 
                 # Define the font style
                 custom_font = Font(name="Arial", size=11)
@@ -814,22 +947,28 @@ def main():
                 # format the headers
                 ws["A105"].font = Font(name="Arial", size=12, bold=True)
                 ws["B105"].font = Font(name="Arial", size=12, bold=True)
+
                 ws["A107"].font = Font(name="Arial", size=11, bold=True)
-                ws["B107"].font = Font(name="Arial", size=11, bold=True)
+                ws["A108"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A110"].font = Font(name="Arial", size=11, bold=True)
                 ws["A111"].font = Font(name="Arial", size=11, bold=True)
-                ws["B111"].font = Font(name="Arial", size=11, bold=True)
-                ws["A123"].font = Font(name="Arial", size=11, bold=True)
-                ws["B123"].font = Font(name="Arial", size=11, bold=True)
+
+                ws["A113"].font = Font(name="Arial", size=11, bold=True)
+                ws["A114"].font = Font(name="Arial", size=11, bold=True)
+                ws["A115"].font = Font(name="Arial", size=11, bold=True)
 
                 ws["A107"].alignment = copy(ws["C23"].alignment)
-                ws["B107"].alignment = copy(ws["C23"].alignment)
-                ws["A111"].alignment = copy(ws["C23"].alignment)
-                ws["B111"].alignment = copy(ws["C23"].alignment)
-                ws["A123"].alignment = copy(ws["C23"].alignment)
-                ws["B123"].alignment = copy(ws["C23"].alignment)
+                ws["A108"].alignment = copy(ws["C23"].alignment)
 
-                # rounding - Column B
-                for row in ws.iter_rows(min_row=105, max_row=141, min_col=2, max_col=2):
+                ws["A110"].alignment = copy(ws["C23"].alignment)
+                ws["A111"].alignment = copy(ws["C23"].alignment)
+                ws["A113"].alignment = copy(ws["C23"].alignment)
+                ws["A114"].alignment = copy(ws["C23"].alignment)
+                ws["A115"].alignment = copy(ws["C23"].alignment)
+
+                # rounding
+                for row in ws.iter_rows(min_row=105, max_row=116, min_col=2, max_col=11):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
@@ -837,7 +976,7 @@ def main():
                             cell.number_format = '0.0'
 
                 # row height
-                for row in range(104, 142):
+                for row in range(104, 116):
                     ws.row_dimensions[row].height = 15
 
                 # get standard deviation values in template
