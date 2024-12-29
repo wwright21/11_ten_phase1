@@ -106,7 +106,6 @@ def main():
         label="Choose completed reporting template",
         label_visibility='collapsed',
         accept_multiple_files=True,
-        type=["xlsx"],
         help="Upload Survey Monkey template(s) here."
     )
 
@@ -120,6 +119,13 @@ def main():
 
         # Iterate through uploaded files
         for uploaded_file in uploaded_files:
+
+            # check the file extension of the uploaded file. If it's not XLSX, return an error message
+            if uploaded_file.name.split('.')[-1] != 'xlsx':
+                st.error(
+                    "The uploaded file is not in the correct format. Please upload an Excel file.")
+                return
+
             # Read the file into memory
             file_data = io.BytesIO(uploaded_file.read())
 
@@ -130,6 +136,12 @@ def main():
             # Iterate over all merged cells and unmerge them
             for merged_cell_range in list(ws.merged_cells.ranges):
                 ws.unmerge_cells(str(merged_cell_range))
+
+            # check to see if the uploaded file has already been cleaned by seeing if cell D23 is empty. If it is, we're good to go.
+            if ws["D23"].value is not None:
+                st.error(
+                    "The uploaded file appears to have been processed already! Please upload a different file.")
+                return
 
             # Add new columns & formatting
             ws["D23"] = "Question Order"
