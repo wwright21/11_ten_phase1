@@ -3,7 +3,7 @@ import pandas as pd
 import io
 import zipfile
 import openpyxl
-from openpyxl.styles import Font
+from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 from copy import copy
 import numpy as np
@@ -580,7 +580,7 @@ def main():
 
                 # Add the overall average
                 ws["A105"] = "Overall Average"
-                ws["B105"] = overall_avg
+                ws["B105"] = int(overall_avg)
 
                 # use a custom sort for the summary table
                 first0_summary['1st-Order Category'] = pd.Categorical(
@@ -764,8 +764,8 @@ def main():
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
-                            # Round to 1 decimal place
-                            cell.number_format = '0.0'
+
+                            cell.number_format = '0'
 
                 # row height
                 for row in range(104, 116):
@@ -985,7 +985,7 @@ def main():
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
                             # Round to 1 decimal place
-                            cell.number_format = '0.0'
+                            cell.number_format = '0'
 
                 # row height
                 for row in range(104, 116):
@@ -1043,6 +1043,30 @@ def main():
                     ws[f"G{row}"] = row_data["3rd-Order Category"]
                     row += 1  # Move to the next row
                 ws.column_dimensions['G'].width = 18
+
+            # remove 3rd-order category for the 'Leader' template
+            if template == 'Leader':
+                ws.delete_rows(113, 4)
+
+            if template == 'Team':
+                start_col, end_col = 3, 10
+
+                # Loop backward through columns to shift values right
+                for col in range(end_col, start_col - 1, -1):  # From J to C
+                    for row in range(113, 116):  # Rows 113 to 115
+                        ws.cell(row=row, column=col + 1,
+                                value=ws.cell(row=row, column=col).value)
+                        # Clear old cell
+                        ws.cell(row=row, column=col, value=None)
+
+                # now insert 'Health' into column C
+                ws["C113"] = "Health"
+                ws["C114"] = "N/A"
+                ws["C115"] = "N/A"
+
+                # now right-align cells C114 and C115
+                ws["C114"].alignment = Alignment(horizontal="right")
+                ws["C115"].alignment = Alignment(horizontal="right")
 
             # For the Review and No Leader templates, there will be no 3rd order category
             else:
