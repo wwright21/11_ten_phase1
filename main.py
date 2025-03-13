@@ -1063,7 +1063,6 @@ def main():
                 ws["C113"] = "Health"
                 ws["C114"] = "N/A"
                 ws["C115"] = "N/A"
-                ws["I3"] = ""
 
                 # now right-align cells C114 and C115
                 ws["C114"].alignment = Alignment(horizontal="right")
