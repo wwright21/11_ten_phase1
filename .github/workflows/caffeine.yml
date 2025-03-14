@@ -22,6 +22,6 @@ jobs:
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
         with:
-          add: "assets/timestamp.txt"
+          add: "Assets/timestamp.txt"
           message: "Automated commit: Adding timestamp file"
           push: true # Ensures the commit is pushed to the repo
