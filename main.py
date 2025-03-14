@@ -898,7 +898,6 @@ def main():
                 third0_leader = third0_summary[third0_summary['3rd-Order Category']
                                                == 'Leader'].drop(columns='3rd-Order Category')
                 third0_leader = third0_leader.set_index("2nd-Order Category").T
-                third0_leader.to_csv('third0_leader.csv', index=False)
 
                 # New code for wide format
                 row = 114  # Starting point
@@ -980,7 +979,7 @@ def main():
                 ws["A115"].alignment = copy(ws["C23"].alignment)
 
                 # rounding
-                for row in ws.iter_rows(min_row=105, max_row=116, min_col=2, max_col=11):
+                for row in ws.iter_rows(min_row=105, max_row=117, min_col=2, max_col=12):
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
