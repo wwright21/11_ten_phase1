@@ -343,6 +343,8 @@ def main():
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
+                            cell.value = round(cell.value, 0)
+
                             # Round to 1 decimal place
                             cell.number_format = '0.0'
 
@@ -516,6 +518,8 @@ def main():
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
+                            cell.value = round(cell.value, 0)
+
                             # Round to 1 decimal place
                             cell.number_format = '0.0'
 
@@ -764,6 +768,7 @@ def main():
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
+                            cell.value = round(cell.value, 0)
 
                             cell.number_format = '0'
 
@@ -983,6 +988,8 @@ def main():
                     for cell in row:
                         # Check if cell contains a numeric value
                         if isinstance(cell.value, (int, float)):
+                            cell.value = round(cell.value, 0)
+
                             # Round to 1 decimal place
                             cell.number_format = '0'
 
@@ -1066,6 +1073,17 @@ def main():
                 # now right-align cells C114 and C115
                 ws["C114"].alignment = Alignment(horizontal="right")
                 ws["C115"].alignment = Alignment(horizontal="right")
+
+                # re-do the rounding
+                for row in ws.iter_rows(min_row=105, max_row=117, min_col=2, max_col=15):
+                    for cell in row:
+                        # Check if cell contains a numeric value
+                        if isinstance(cell.value, (int, float)):
+                            # round to the nearest whole number
+                            cell.value = round(cell.value, 0)
+
+                            # set the format to integer
+                            cell.number_format = '0'
 
             # For the Review and No Leader templates, there will be no 3rd order category
             else:
